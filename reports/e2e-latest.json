@@ -1,13 +1,15 @@
 {
   "baseURL": "https://verified-community-gate.vercel.app",
-  "startedAt": "2026-11-23T13:05:59.619Z",
-  "passed": 5,
+  "startedAt": "2026-11-23T14:53:10.085Z",
+  "passed": 7,
   "failed": 0,
   "results": {
     "a pending member sees no one and gets a 404 on a direct member link": "passed",
     "an approved member sees only approved, unblocked members": "passed",
     "media needs a valid signature: none is 403, tampered is 403, valid is 200": "passed",
     "a moderator approval makes the new member visible to approved members": "passed",
-    "replacing the video sends a member back to review and hides them": "passed"
+    "replacing the video sends a member back to review and hides them": "passed",
+    "a free member must subscribe to start a conversation, and replying stays free": "passed",
+    "the third open report hides a member until a moderator reviews the reports": "passed"
   }
 }
