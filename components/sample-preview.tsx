@@ -23,6 +23,8 @@ export function SamplePreview({ link: initial, label, className }: { link: Signe
       src={link.url}
       aria-label={label}
       className={className}
+      disablePictureInPicture
+      onContextMenu={(event) => event.preventDefault()}
       muted
       loop
       playsInline

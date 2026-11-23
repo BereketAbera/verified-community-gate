@@ -215,7 +215,8 @@ export default async function HowItWorksPage() {
         <p>
           A new member records a 2 to 5 minute video answering five prompts, three asked of everyone and two they choose, in
           every language on their profile. The moderator watches it beside the photo and ticks what they saw and heard: the same
-          person, each prompt, each language. The length is checked from the recording. Approve stays off until every item
+          person, each prompt, each language. In Phase 1 the length is read from the uploaded recording; in this sample each
+          clip carries its length. Approve stays off until every item
           passes, and the checklist is saved in the audit log with the decision.
         </p>
         <CodeBlock file="lib/verification.ts" code={approval} />

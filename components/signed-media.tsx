@@ -109,6 +109,11 @@ export function SignedMedia({ link: initial, alt, controls = "always", autoPlay 
             aria-label={alt}
             className="aspect-[3/4] w-full bg-zinc-900 object-cover"
             controls
+            // Private media: no download button, no picture-in-picture, no "Save video as" menu.
+            // Screen recording can't be blocked; reports and bans cover that.
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
+            onContextMenu={(event) => event.preventDefault()}
             muted
             loop
             playsInline
