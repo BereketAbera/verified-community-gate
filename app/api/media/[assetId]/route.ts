@@ -46,7 +46,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const filePath = path.join(MEDIA_ROOT, asset.file);
   if (!filePath.startsWith(MEDIA_ROOT + path.sep)) return deny(404, "not_found", "Not found.");
-  const data = new Uint8Array(await readFile(filePath));
+  let data: Uint8Array<ArrayBuffer>;
+  try {
+    data = new Uint8Array(await readFile(filePath));
+  } catch {
+    return deny(404, "not_found", "Not found.");
+  }
   const size = data.byteLength;
   const headers = {
     ...BASE_HEADERS,

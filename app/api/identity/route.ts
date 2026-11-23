@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { IdentityInput, switchIdentity } from "@/lib/domain";
 import type { Sandbox } from "@/lib/sandbox";
+import { SandboxFullError } from "@/lib/sandbox-codec";
 import { loadSandbox, sandboxCookie } from "@/lib/server/session";
 import { isSameOrigin } from "@/lib/server/origin";
 
@@ -24,11 +25,21 @@ function landingFor(sb: Sandbox): string {
 /** Demo identity switch. A plain form post, so it also works without JavaScript and from curl. */
 export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "cross_origin" }, { status: 403 });
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  }
   const parsed = IdentityInput.safeParse(form.get("as"));
   if (!parsed.success) return NextResponse.json({ error: "unknown_identity" }, { status: 400 });
   const next = switchIdentity(await loadSandbox(), parsed.data);
   const response = new NextResponse(null, { status: 303, headers: { Location: landingFor(next) } });
-  response.cookies.set(await sandboxCookie(next));
+  try {
+    response.cookies.set(await sandboxCookie(next));
+  } catch (error) {
+    if (!(error instanceof SandboxFullError)) throw error;
+    return new NextResponse(null, { status: 303, headers: { Location: "/?notice=storage-full" } });
+  }
   return response;
 }

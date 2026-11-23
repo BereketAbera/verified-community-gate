@@ -25,6 +25,8 @@ export const getGate = cache(async () => {
     viewer,
     identity: sandbox.as,
     hasSignedUp: sandbox.self !== null,
+    /** Display name of this browser's own signup, for the identity menu. */
+    selfName: sandbox.self?.name ?? null,
     /** Signed links are bound to this viewer and this browser session. */
     viewerKey: viewer ? `${sandbox.sid}:${viewer.id}` : null,
   };
