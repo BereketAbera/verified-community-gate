@@ -2,7 +2,7 @@
 export const E2E_TESTS = [
   {
     title: "a pending member sees no one and gets a 404 on a direct member link",
-    rule: "A pending account cannot see members, and a direct member URL returns a real 404 (R5).",
+    rule: "A pending account cannot see members, nobody can see it, and a direct member URL returns a real 404 (R5).",
   },
   {
     title: "an approved member sees only approved, unblocked members",
@@ -14,10 +14,18 @@ export const E2E_TESTS = [
   },
   {
     title: "a moderator approval makes the new member visible to approved members",
-    rule: "A profile stays invisible until a person approves it, then appears at once (R2, R3).",
+    rule: "A profile stays invisible until a moderator ticks the checklist (same person, five prompts, each language) and approves; then it appears at once (R2, R3).",
   },
   {
     title: "replacing the video sends a member back to review and hides them",
     rule: "New media goes back to review, and the profile disappears until approved again (R2).",
+  },
+  {
+    title: "a free member must subscribe to start a conversation, and replying stays free",
+    rule: "Accepting a request is free; starting a conversation needs a membership, here through the test-mode checkout (R6, R7).",
+  },
+  {
+    title: "the third open report hides a member until a moderator reviews the reports",
+    rule: "Three open reports hide a profile from every member at once; a moderator's review restores it (R9).",
   },
 ] as const;

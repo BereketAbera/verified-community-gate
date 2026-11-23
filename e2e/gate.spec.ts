@@ -4,7 +4,9 @@ import { approveAsModerator, signUpAndSubmit, switchTo, uniqueName } from "./hel
 test("a pending member sees no one and gets a 404 on a direct member link", async ({ page }) => {
   await signUpAndSubmit(page, uniqueName("Pending Tester"));
   await expect(page.getByTestId("member-card")).toHaveCount(0);
+  // Both numbers come from the policy, not from the page.
   await expect(page.getByTestId("visible-count")).toHaveText("0");
+  await expect(page.getByTestId("seen-by-count")).toHaveText("0");
 
   for (const id of ["m02", "m01", "m08"]) {
     const response = await page.goto(`/members/${id}`);
@@ -101,7 +103,7 @@ test("replacing the video sends a member back to review and hides them", async (
 
   await switchTo(page, "member");
   await page.goto("/me");
-  await page.getByTestId("replace-video-form").locator("select").selectOption("clip-5");
+  await page.getByTestId("replace-video-form").locator("select").selectOption("sample-d");
   await page.getByTestId("replace-video").click();
   await page.waitForURL(/\/me\?notice=replaced-video/);
   await expect(page.getByTestId("profile-visibility")).toContainText("Hidden from everyone");
@@ -116,4 +118,47 @@ test("replacing the video sends a member back to review and hides them", async (
 
   await switchTo(page, "moderator");
   await expect(page.locator('tr[data-member-id="m01"]')).toBeVisible();
+});
+
+test("a free member must subscribe to start a conversation, and replying stays free", async ({ page }) => {
+  await page.goto("/");
+  await switchTo(page, "member");
+
+  // Accepting a request someone sent is free.
+  await page.goto("/messages");
+  await page.getByTestId("conversation-c6").click();
+  await page.getByTestId("accept-request").click();
+  await page.waitForURL(/\/messages\/c6\?notice=accepted/);
+  await expect(page.getByTestId("request-actions")).toHaveCount(0);
+
+  // Starting one is not, until the member subscribes (test mode).
+  await page.goto("/members/m03");
+  await expect(page.getByTestId("request-message")).toHaveCount(0);
+  await page.getByTestId("subscribe").click();
+  await page.waitForURL(/\/members\/m03\?notice=subscribed/);
+  await page.getByTestId("request-message").click();
+  await page.waitForURL(/\/messages\?notice=requested/);
+  await expect(page.locator('[data-testid="conversations"] [data-member-id="m03"]')).toBeVisible();
+});
+
+test("the third open report hides a member until a moderator reviews the reports", async ({ page }) => {
+  await page.goto("/");
+  await switchTo(page, "member");
+  await page.goto("/members/m04");
+  await page.getByTestId("report-member").click();
+  await page.getByRole("radio", { name: "Asked for money" }).click();
+  await page.getByTestId("send-report").click();
+  await page.waitForURL(/\/members\?notice=reported-hidden/);
+  await expect(page.locator('[data-testid="member-card"][data-member-id="m04"]')).toHaveCount(0);
+  expect((await page.goto("/members/m04"))?.status()).toBe(404);
+
+  await switchTo(page, "moderator");
+  await page.goto("/moderate?view=reports");
+  await page.getByTestId("reports-m04").click();
+  await page.getByTestId("clear-reports").click();
+  await page.waitForURL(/\/moderate\/m04\?done=reports/);
+
+  await switchTo(page, "member");
+  await page.waitForURL("**/members");
+  await expect(page.locator('[data-testid="member-card"][data-member-id="m04"]')).toBeVisible();
 });
