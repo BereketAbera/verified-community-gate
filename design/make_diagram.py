@@ -52,7 +52,8 @@ SUMMARY = (
     "the signature and asks the policy again when the link is used. A request is refused with no link, with 403 for "
     "a wrong or expired signature, or with 404 when the policy says no. The same steps are listed below."
 )
-CAPTION = "Teal is the path when every check passes. Grey marks where a request stops."
+# On the page the footnote joins the caption under the figure; the README image carries it inside.
+CAPTION = "Teal is the path when every check passes; grey marks where a request stops. " + FOOTNOTE
 
 FONTS = {"serif": ("Source Serif 4", "font-heading"), "sans": ("Geist", "font-sans"), "mono": ("Geist Mono", "font-mono")}
 LANE_SIZE, LABEL_SIZE, DETAIL_SIZE, MONO_SIZE = 16, 14, 13, 12
@@ -259,7 +260,7 @@ def wide():
         lanes.append(rect(lane_x[i] - 120, 0, 240, 40, 8, TINT))
         lanes.append(txt(lane_x[i], 26, name, LANE_SIZE, "serif", 600, anchor="middle", limit=224))
     foot = [txt(15, end + 30, FOOTNOTE, DETAIL_SIZE, fill=GREY, limit=w - 30)]
-    return w, end + 44, lanes + body + foot
+    return w, end + 4, end + 44, lanes + body, foot
 
 
 def narrow():
@@ -299,11 +300,12 @@ def narrow():
             if i + 1 < len(STEPS) and STEPS[i + 1]["kind"] != "send":
                 body += arrow(rail, y + 3, rail, y + 15)
                 y += 18
+    page_h, foot = y + 2, []
     y += 28
     for line_text in wrap(FOOTNOTE, DETAIL_SIZE, inner):
-        body.append(txt(x0, y, line_text, DETAIL_SIZE, fill=GREY))
+        foot.append(txt(x0, y, line_text, DETAIL_SIZE, fill=GREY))
         y += LINE
-    return w, y - 4, body
+    return w, page_h, y - 4, body, foot
 
 
 # ---------------------------------------------------------------------------- serialise
@@ -391,10 +393,10 @@ def write(path, content):
 
 
 def main():
-    ww, wh, wide_nodes = wide()
-    nw, nh, narrow_nodes = narrow()
-    write(os.path.join(ROOT, "build", "diagram", "signed-link-wide.svg"), standalone(ww, wh, wide_nodes))
-    write(os.path.join(ROOT, "build", "diagram", "signed-link-narrow.svg"), standalone(nw, nh, narrow_nodes))
+    ww, wh, wh_png, wide_nodes, wide_foot = wide()
+    nw, nh, nh_png, narrow_nodes, narrow_foot = narrow()
+    write(os.path.join(ROOT, "build", "diagram", "signed-link-wide.svg"), standalone(ww, wh_png, wide_nodes + wide_foot))
+    write(os.path.join(ROOT, "build", "diagram", "signed-link-narrow.svg"), standalone(nw, nh_png, narrow_nodes + narrow_foot))
     write(
         os.path.join(ROOT, "components", "signed-link-diagram.tsx"),
         COMPONENT.format(

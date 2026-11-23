@@ -9,7 +9,7 @@ export function SignedLinkDiagram() {
   return (
     <figure className="flex flex-col gap-3 rounded-xl bg-card p-3 ring-1 ring-foreground/10 sm:p-5" data-testid="signed-link-diagram">
       <div role="img" aria-label={SUMMARY}>
-        <svg viewBox="0 0 880 576" className="hidden h-auto w-full lg:block" aria-hidden="true" focusable="false">
+        <svg viewBox="0 0 880 536" className="hidden h-auto w-full lg:block" aria-hidden="true" focusable="false">
           <line x1={135} y1={40} x2={135} y2={532} stroke="#c3cccb" strokeWidth={1.5} strokeDasharray="3 5" />
           <rect x={15} y={0} width={240} height={40} rx={8} fill="#e9f2f3" />
           <text className="font-heading" x={135} y={26} fontSize={16} fill="#1a222b" fontWeight={600} textAnchor="middle">{"Member's browser"}</text>
@@ -57,9 +57,8 @@ export function SignedLinkDiagram() {
           <text className="font-mono" x={430} y={508} fontSize={12} fill="#5b646f" textAnchor="middle">{"200 · Cache-Control: private, no-store"}</text>
           <line x1={725} y1={520} x2={145} y2={520} stroke="#165a5e" strokeWidth={1.5} />
           <path d="M137 520L145 515.5L145 524.5Z" fill="#165a5e" />
-          <text className="font-sans" x={15} y={562} fontSize={13} fill="#5b646f">{"An expired link gets 403, and the page asks for a fresh one, so the policy is asked again."}</text>
         </svg>
-        <svg viewBox="0 0 340 692" className="mx-auto block h-auto w-full max-w-[400px] lg:hidden" aria-hidden="true" focusable="false">
+        <svg viewBox="0 0 340 636" className="mx-auto block h-auto w-full max-w-[400px] lg:hidden" aria-hidden="true" focusable="false">
           <rect x={8} y={0} width={220} height={32} rx={8} fill="#e9f2f3" />
           <text className="font-heading" x={20} y={21.5} fontSize={15} fill="#1a222b" fontWeight={600}>{"Member's browser"}</text>
           <line x1={30} y1={38} x2={30} y2={59} stroke="#165a5e" strokeWidth={1.5} />
@@ -106,11 +105,9 @@ export function SignedLinkDiagram() {
           <text className="font-mono" x={46} y={586} fontSize={12} fill="#5b646f">{"200 · Cache-Control: private, no-store"}</text>
           <rect x={8} y={602} width={220} height={32} rx={8} fill="#e9f2f3" />
           <text className="font-heading" x={20} y={623.5} fontSize={15} fill="#1a222b" fontWeight={600}>{"Member's browser"}</text>
-          <text className="font-sans" x={8} y={662} fontSize={13} fill="#5b646f">{"An expired link gets 403, and the page asks for a"}</text>
-          <text className="font-sans" x={8} y={679} fontSize={13} fill="#5b646f">{"fresh one, so the policy is asked again."}</text>
         </svg>
       </div>
-      <figcaption className="text-sm text-muted-foreground">Teal is the path when every check passes. Grey marks where a request stops.</figcaption>
+      <figcaption className="text-sm text-muted-foreground">Teal is the path when every check passes; grey marks where a request stops. An expired link gets 403, and the page asks for a fresh one, so the policy is asked again.</figcaption>
     </figure>
   );
 }
