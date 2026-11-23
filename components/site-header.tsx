@@ -37,7 +37,7 @@ export async function SiteHeader() {
             <span className="inline-block size-1.5 rounded-full bg-primary" aria-hidden />
             Demo identities, no real sign-in
           </p>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
             {viewer && viewer.role === "member" ? (
               <StatusBadge status={displayStatus(viewer)} className="bg-card" />
             ) : null}
