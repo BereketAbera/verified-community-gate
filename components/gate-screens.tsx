@@ -3,7 +3,6 @@ import { ArrowRight, Check, LockKeyhole, ShieldAlert, UserRoundX } from "lucide-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Account } from "@/lib/types";
-import { BrandMark } from "./brand-mark";
 import { StatusBadge } from "./status-badge";
 
 /** A screen leads with an icon, or with something more specific such as the verification steps. */
@@ -48,8 +47,31 @@ export function MembersOnlyScreen() {
 type StepState = "done" | "current" | "next";
 
 /**
- * Where a new member is in review, in their own words. The current step is drawn with the mark
- * (photo beside video), because that comparison is what the member is waiting for.
+ * One step's marker. Each sits on a 4 px ring in the card colour, so the line that joins the
+ * steps stops the same distance from every marker.
+ */
+function StepMarker({ state }: { state: StepState }) {
+  if (state === "done") {
+    return (
+      <span className="relative z-10 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-card">
+        <Check className="size-3.5" strokeWidth={3} aria-hidden />
+      </span>
+    );
+  }
+  if (state === "current") {
+    return (
+      <span className="relative z-10 flex size-6 items-center justify-center rounded-full border-2 border-primary bg-card ring-4 ring-card">
+        <span className="size-2.5 rounded-full bg-primary" />
+      </span>
+    );
+  }
+  return <span className="relative z-10 size-3 rounded-full border-2 border-muted-foreground/45 bg-card ring-4 ring-card" />;
+}
+
+/**
+ * Where a new member is in review, in their own words. From 640 px up every step is labelled;
+ * on phones the row stays and only the current step is named under it, so the screen's
+ * button stays near the top.
  */
 function VerificationSteps({ submitted }: { submitted: boolean }) {
   const steps: Array<{ label: string; state: StepState }> = [
@@ -58,36 +80,32 @@ function VerificationSteps({ submitted }: { submitted: boolean }) {
     { label: "A moderator compares them", state: submitted ? "current" : "next" },
     { label: "Visible to approved members", state: "next" },
   ];
+  const current = steps.findIndex((step) => step.state === "current");
   return (
-    <ol aria-label="Your verification" className="mb-2 flex w-full max-w-xs flex-col gap-3 text-left text-sm sm:max-w-none sm:flex-row sm:gap-0 sm:text-center" data-testid="verification-steps">
-      {steps.map((step, i) => (
-        <li
-          key={step.label}
-          aria-current={step.state === "current" ? "step" : undefined}
-          data-state={step.state}
-          className="relative flex items-center gap-3 sm:flex-1 sm:flex-col sm:gap-2"
-        >
-          {i > 0 ? <span aria-hidden className="absolute top-5 right-1/2 hidden h-px w-full bg-border sm:block" /> : null}
-          <span className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-card">
-            {step.state === "done" ? (
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Check className="size-3.5" strokeWidth={3} aria-hidden />
-              </span>
-            ) : step.state === "current" ? (
-              <span className="flex size-10 items-center justify-center rounded-full bg-secondary ring-1 ring-primary/25">
-                <BrandMark className="size-7 text-primary" />
-              </span>
-            ) : (
-              <span className="size-3 rounded-full border-2 border-muted-foreground/45" />
-            )}
-          </span>
-          <span className={cn("leading-snug sm:px-1", step.state === "current" ? "font-medium text-foreground" : "text-muted-foreground")}>
-            {step.label}
-            {step.state === "done" ? <span className="sr-only">, done</span> : step.state === "next" ? <span className="sr-only">, not yet</span> : null}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <div className="mb-2 flex w-full flex-col items-center gap-2">
+      <ol aria-label="Your verification" className="grid w-full max-w-[17rem] grid-cols-4 text-sm sm:max-w-none" data-testid="verification-steps">
+        {steps.map((step, i) => (
+          <li
+            key={step.label}
+            aria-current={step.state === "current" ? "step" : undefined}
+            data-state={step.state}
+            className="relative flex flex-col items-center gap-2 px-1 text-center"
+          >
+            {i > 0 ? <span aria-hidden className="absolute top-3 right-1/2 h-px w-full bg-border" /> : null}
+            <span className="flex h-6 items-center justify-center">
+              <StepMarker state={step.state} />
+            </span>
+            <span className={cn("sr-only leading-snug sm:not-sr-only", step.state === "current" ? "font-medium text-foreground" : "text-muted-foreground")}>
+              {step.label}
+              {step.state === "done" ? <span className="sr-only">, done</span> : step.state === "next" ? <span className="sr-only">, not yet</span> : null}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p aria-hidden className="text-sm text-muted-foreground sm:hidden">
+        Step {current + 1} of {steps.length}: <span className="font-medium text-foreground">{steps[current].label}</span>
+      </p>
+    </div>
   );
 }
 
@@ -131,7 +149,6 @@ export function ViewerStatusScreen({ viewer, counts }: { viewer: Account; counts
   if (viewer.status === "pending" && !viewer.submittedAt) {
     return (
       <Screen lead={<VerificationSteps submitted={false} />} title="Finish your verification" testId="verification-needed">
-        <StatusBadge status="not_submitted" />
         <p>Add a photo and a 2 to 5 minute video answering five prompts. Until a moderator has compared them, your profile stays hidden.</p>
         <VisibleCount {...counts} />
         <Button asChild>
@@ -143,7 +160,6 @@ export function ViewerStatusScreen({ viewer, counts }: { viewer: Account; counts
   if (viewer.status === "pending") {
     return (
       <Screen lead={<VerificationSteps submitted />} title="Your profile is under review" testId="under-review">
-        <StatusBadge status="pending" />
         <p>
           A moderator is comparing your video with your photo. Until they approve it, your profile is hidden from everyone and
           member profiles are hidden from you.
