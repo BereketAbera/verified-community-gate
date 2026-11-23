@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Check, Copy, KeyRound, RefreshCw, ShieldCheck } from "lucide-react";
+import { Check, Copy, KeyRound, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SignedLink } from "@/lib/types";
@@ -23,7 +23,7 @@ export function SecurityDetails({ children }: { children: React.ReactNode }) {
         className="inline-flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         data-testid="security-details"
       >
-        <ShieldCheck className="size-3.5" aria-hidden />
+        <KeyRound className="size-3.5" aria-hidden />
         {shown ? "Hide security details" : "Show security details"}
       </button>
     </SecurityDetailsContext.Provider>

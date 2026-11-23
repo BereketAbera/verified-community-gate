@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowDown, ArrowRight, EyeOff, FileCheck2, Gavel, KeyRound, ListChecks, ShieldCheck, UserRoundPlus, UsersRound } from "lucide-react";
+import { ArrowDown, ArrowRight, EyeOff, FileCheck2, KeyRound, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Notice } from "@/components/notice";
@@ -7,14 +7,13 @@ import { param, type RawParams } from "@/lib/params";
 import { getGate } from "@/lib/server/gate";
 import type { Identity } from "@/lib/types";
 
-const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: string; cta: string; icon: typeof UsersRound }> = [
+const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: string; cta: string }> = [
   {
     value: "newcomer",
     title: "Your signup",
     who: "A new member, hidden until approved",
     body: "Sign up, then pick a photo, a video and two prompts. Search is empty and member links return 404.",
     cta: "Start a signup",
-    icon: UserRoundPlus,
   },
   {
     value: "member",
@@ -22,7 +21,6 @@ const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: str
     who: "Amara Okafor, approved, free plan",
     body: "Browse and filter, accept a message request for free, subscribe in test mode to start one, report, block, make media private.",
     cta: "Continue as Amara",
-    icon: UsersRound,
   },
   {
     value: "moderator",
@@ -30,7 +28,6 @@ const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: str
     who: "Morgan Lee",
     body: "Photo beside video with a checklist: same person, five prompts, each language, 2 to 5 minutes. Reject with a reason, flag, notes, reports.",
     cta: "Continue as Morgan",
-    icon: Gavel,
   },
   {
     value: "admin",
@@ -38,7 +35,6 @@ const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: str
     who: "Riley Park",
     body: "Everything a moderator does, plus suspend, ban, reinstate and complimentary access with an end date.",
     cta: "Continue as Riley",
-    icon: ShieldCheck,
   },
 ];
 
@@ -113,10 +109,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
           <p className="text-muted-foreground">Your changes stay in an encrypted cookie in this browser. Reset demo clears them.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {IDENTITIES.map(({ value, title, who, body, cta, icon: Icon }) => (
+          {IDENTITIES.map(({ value, title, who, body, cta }) => (
             <Card key={value} className={value === identity ? "ring-2 ring-primary/50" : undefined}>
               <CardHeader>
-                <Icon className="mb-1 size-5 text-primary" aria-hidden />
                 <h3 className="font-heading text-lg leading-snug font-medium" data-slot="card-title">{title}</h3>
                 <CardDescription>{who}</CardDescription>
               </CardHeader>

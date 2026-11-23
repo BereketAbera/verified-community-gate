@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { Sparkles } from "lucide-react";
 import { signupAction, type FormState } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,7 +66,7 @@ export function SignupForm() {
       <div className="flex flex-wrap items-center gap-3 rounded-xl bg-secondary/70 px-4 py-3 text-sm text-secondary-foreground ring-1 ring-primary/10">
         <span>In a hurry? Fill the form with fictional answers, then submit.</span>
         <Button type="button" size="sm" variant="outline" className="bg-card" onClick={() => setPrefill({ n: Date.now(), values: SAMPLE_ANSWERS })} data-testid="fill-sample">
-          <Sparkles aria-hidden /> Fill with sample answers
+          Fill with sample answers
         </Button>
       </div>
       <SignupFields key={key} state={shown} values={values} pending={pending} />

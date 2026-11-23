@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
 import { getGate } from "@/lib/server/gate";
+import { BrandMark } from "./brand-mark";
 import { IdentitySwitcher, type IdentityOption } from "./identity-switcher";
 import { NavLinks } from "./nav-links";
 import { displayStatus, StatusBadge } from "./status-badge";
@@ -30,7 +30,7 @@ export async function SiteHeader() {
   nav.push({ href: "/how-it-works", label: "How it works" }, { href: "/tests", label: "Tests" });
 
   return (
-    <header className="border-b border-border/80 bg-card/70 backdrop-blur">
+    <header className="border-b border-border/80 bg-card/70">
       <div className="bg-secondary/80 text-secondary-foreground">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs sm:px-6 sm:text-sm">
           <p className="flex items-center gap-2">
@@ -52,9 +52,7 @@ export async function SiteHeader() {
       </div>
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
         <Link href="/" className="group flex items-center gap-3 self-start rounded-lg">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="size-5" aria-hidden />
-          </span>
+          <BrandMark className="size-10 shrink-0 text-primary" />
           <span className="leading-tight">
             <span className="block font-heading text-lg font-semibold tracking-tight">Trust gate demo</span>
             <span className="hidden text-xs text-muted-foreground sm:block sm:text-sm">Verified community: hidden by default, video-checked by a person</span>
