@@ -1,38 +1,44 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Search } from "lucide-react";
+import { unblockAction } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { MemberCard } from "@/components/member-card";
 import { MembersOnlyScreen, ViewerStatusScreen } from "@/components/gate-screens";
 import { Notice } from "@/components/notice";
 import { PageTitle } from "@/components/page-title";
-import { COUNTRIES, LANGUAGES, LOOKING_FOR_LABELS } from "@/lib/reference";
+import { oneOf, param, type RawParams } from "@/lib/params";
+import { COUNTRY_CODES, COUNTRIES, LANGUAGES, LOOKING_FOR_LABELS } from "@/lib/reference";
 import { getGate } from "@/lib/server/gate";
 import { signedLinkFor } from "@/lib/server/media-links";
-import { LOOKING_FOR, type LookingFor } from "@/lib/types";
+import { LOOKING_FOR } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Members" };
-
-type Params = { q?: string; country?: string; language?: string; lookingFor?: string; notice?: string };
 
 const selectClass =
   "h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
-export default async function MembersPage({ searchParams }: { searchParams: Promise<Params> }) {
+export default async function MembersPage({ searchParams }: { searchParams: Promise<RawParams> }) {
   const params = await searchParams;
   const gate = await getGate();
   const { viewer, policy } = gate;
 
   if (!viewer) return <MembersOnlyScreen />;
-  if (viewer.status !== "approved") return <ViewerStatusScreen viewer={viewer} />;
+  if (viewer.status !== "approved") {
+    return <ViewerStatusScreen viewer={viewer} counts={{ canSee: policy.listVisibleMembers(viewer).length, seenBy: policy.countWhoCanSee(viewer) }} />;
+  }
 
   const filters = {
-    q: params.q?.slice(0, 40) || undefined,
-    country: params.country || undefined,
-    language: params.language || undefined,
-    lookingFor: LOOKING_FOR.includes(params.lookingFor as LookingFor) ? (params.lookingFor as LookingFor) : undefined,
+    q: param(params, "q"),
+    country: oneOf(params, "country", COUNTRY_CODES),
+    language: oneOf(params, "language", LANGUAGES),
+    lookingFor: oneOf(params, "lookingFor", LOOKING_FOR),
   };
+  const notice = param(params, "notice");
+  const blockedId = param(params, "who", 24);
   const members = policy.listVisibleMembers(viewer, filters);
   const filtered = Object.values(filters).some(Boolean);
 
@@ -43,9 +49,26 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         neither does anyone you blocked or who blocked you.
       </PageTitle>
 
-      {params.notice === "blocked" ? (
-        <Notice tone="success" title="Member blocked">You will not see each other anywhere now: search, profiles, messages or media.</Notice>
+      {notice === "blocked" ? (
+        <Notice tone="success" title="Member blocked">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span>You will not see each other anywhere now: search, profiles, messages or media.</span>
+            {blockedId ? (
+              <form action={unblockAction}>
+                <input type="hidden" name="targetId" value={blockedId} />
+                <input type="hidden" name="back" value="member" />
+                <SubmitButton size="xs" variant="outline" className="bg-card" data-testid="undo-block">Undo</SubmitButton>
+              </form>
+            ) : null}
+          </div>
+        </Notice>
       ) : null}
+      {notice === "reported-hidden" ? (
+        <Notice tone="success" title="Report sent">
+          That was the third open report, so the profile is hidden from every member until a moderator reviews the reports.
+        </Notice>
+      ) : null}
+      {notice === "storage-full" ? <Notice tone="warning" title="Demo storage is full">Use Reset demo to start again.</Notice> : null}
 
       <form
         method="get"
@@ -53,7 +76,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="q" className="max-lg:sr-only">Name or city</Label>
-          <Input id="q" name="q" defaultValue={filters.q} placeholder="Search by name or city" className="h-9 bg-card" />
+          <Input id="q" name="q" defaultValue={filters.q} placeholder="Search by name or city" className="h-9 bg-card" maxLength={40} />
         </div>
         <div className="col-span-2 grid grid-cols-2 gap-2 lg:contents">
           <div className="flex min-w-0 flex-col gap-1.5">
@@ -89,13 +112,25 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         </Button>
       </form>
 
-      <p className="text-sm text-muted-foreground" data-testid="result-count">
-        {members.length} {members.length === 1 ? "member" : "members"}
-        {filtered ? " match your filters" : " visible to you"}
+      <p className="flex flex-wrap items-center gap-x-3 text-sm text-muted-foreground" data-testid="result-count">
+        <span>
+          {members.length} {members.length === 1 ? "member" : "members"}
+          {filtered ? " match your filters" : " visible to you"}
+        </span>
+        {filtered ? (
+          <Link href="/members" className="font-medium text-primary underline-offset-4 hover:underline">Clear filters</Link>
+        ) : null}
       </p>
 
       {members.length === 0 ? (
-        <p className="rounded-xl bg-card p-8 text-center text-muted-foreground ring-1 ring-foreground/10">No members match these filters.</p>
+        <div className="flex flex-col items-center gap-3 rounded-xl bg-card p-8 text-center text-muted-foreground ring-1 ring-foreground/10">
+          <p>{filtered ? "No members match these filters." : "Nobody is visible to you right now."}</p>
+          {filtered ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href="/members">Clear filters</Link>
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4" data-testid="member-grid">
           {members.map((member) => {

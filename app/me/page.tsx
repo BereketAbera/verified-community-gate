@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EyeOff, UsersRound } from "lucide-react";
-import { unblockAction, visibilityAction } from "@/app/actions";
+import { CreditCard, EyeOff, UsersRound } from "lucide-react";
+import { subscribeAction, unblockAction, visibilityAction } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { MembersOnlyScreen } from "@/components/gate-screens";
 import { MediaPlaceholder } from "@/components/media-placeholder";
 import { Notice } from "@/components/notice";
 import { ReplaceMediaForm } from "@/components/forms/replace-media-form";
+import { PendingSubmit, SubmitButton } from "@/components/forms/submit-button";
 import { SignedMedia } from "@/components/signed-media";
-import { StatusBadge } from "@/components/status-badge";
+import { displayStatus, StatusBadge } from "@/components/status-badge";
+import { ACCESS_LABELS, hasActiveAccess } from "@/lib/access";
+import { formatDate, formatDateTime } from "@/lib/format";
+import { param, pick, type RawParams } from "@/lib/params";
+import { describe, EXTRA_FIELDS, FAITH_FIELDS } from "@/lib/profile-fields";
 import { countryName, LOOKING_FOR_LABELS } from "@/lib/reference";
 import { getGate, type Gate } from "@/lib/server/gate";
 import { signedLinkFor } from "@/lib/server/media-links";
@@ -24,6 +29,8 @@ const NOTICES: Record<string, { tone: "success" | "warning" | "info"; title: str
   "visibility-photo": { tone: "success", title: "Photo visibility updated", body: "The change applies to new links at once, and to links already issued on their next request." },
   "visibility-video": { tone: "success", title: "Video visibility updated", body: "The change applies to new links at once, and to links already issued on their next request." },
   unblocked: { tone: "success", title: "Member unblocked", body: "You can see each other again, as long as both profiles stay approved." },
+  subscribed: { tone: "success", title: "Test-mode subscription active", body: "In Phase 1 this opens the processor's hosted checkout; its webhook writes the same record." },
+  "storage-full": { tone: "warning", title: "Demo storage is full", body: "Use Reset demo to start again." },
   error: { tone: "warning", title: "That change was not allowed", body: "Nothing was changed." },
 };
 
@@ -45,6 +52,25 @@ function MediaManager({ gate, viewer, kind }: { gate: Gate; viewer: Account; kin
   const link = slot.state === "available" ? signedLinkFor(gate, slot.asset) : null;
   const visibility = link?.visibility;
   const restricted = viewer.status === "suspended" || viewer.status === "banned";
+  const noun = kind === "photo" ? "photo" : "video";
+  const labelId = `${kind}-visibility-label`;
+
+  let media: React.ReactNode;
+  if (link) media = <SignedMedia link={link} alt={`Your ${noun}`} autoPlay />;
+  else if (restricted) media = <MediaPlaceholder kind={kind} reason="ended" />;
+  else if (!viewer.submittedAt)
+    media = (
+      <MediaPlaceholder
+        kind={kind}
+        reason="empty"
+        action={
+          <Button asChild size="sm">
+            <Link href="/join/verify">Add photo and video</Link>
+          </Button>
+        }
+      />
+    );
+  else media = <MediaPlaceholder kind={kind} reason="none" />;
 
   return (
     <div className="flex flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10" data-testid={`my-${kind}`}>
@@ -56,27 +82,26 @@ function MediaManager({ gate, viewer, kind }: { gate: Gate; viewer: Account; kin
           </span>
         ) : null}
       </div>
-      {link ? <SignedMedia link={link} alt={`Your ${kind}`} autoPlay /> : <MediaPlaceholder kind={kind} reason={restricted ? "ended" : "none"} />}
+      {media}
       {link ? (
-        <div className="flex flex-col gap-2">
-          <p className="text-xs font-medium text-muted-foreground">Who can see it</p>
+        <div className="flex flex-col gap-2" role="group" aria-labelledby={labelId}>
+          <p id={labelId} className="text-xs font-medium text-muted-foreground">Who can see your {noun}</p>
           <div className="grid grid-cols-2 gap-2">
             {(["members", "private"] as const).map((option) => (
               <form key={option} action={visibilityAction}>
                 <input type="hidden" name="kind" value={kind} />
                 <input type="hidden" name="visibility" value={option} />
-                <button
-                  type="submit"
+                <PendingSubmit
                   data-testid={`${kind}-visibility-${option}`}
                   aria-pressed={visibility === option}
                   className={cn(
-                    "flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs ring-1 ring-inset transition",
+                    "flex w-full items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs ring-1 ring-inset transition disabled:opacity-60",
                     visibility === option ? "bg-primary text-primary-foreground ring-primary" : "bg-card ring-foreground/15 hover:bg-muted",
                   )}
                 >
                   {option === "members" ? <UsersRound className="size-3.5" aria-hidden /> : <EyeOff className="size-3.5" aria-hidden />}
                   {option === "members" ? "Approved members" : "Private"}
-                </button>
+                </PendingSubmit>
               </form>
             ))}
           </div>
@@ -88,15 +113,47 @@ function MediaManager({ gate, viewer, kind }: { gate: Gate; viewer: Account; kin
   );
 }
 
-export default async function MePage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
-  const { notice } = await searchParams;
+function Membership({ gate, viewer }: { gate: Gate; viewer: Account }) {
+  const { access } = viewer;
+  const active = hasActiveAccess(access, Date.now());
+  const founding = gate.policy.foundingPlaces();
+  let summary: string;
+  if (access.kind === "founding" && access.until === null) summary = "Founding member: your three free months start when a moderator approves you.";
+  else if (access.kind === "free") summary = "Free plan: browse, reply and accept requests.";
+  else if (!active) summary = `${ACCESS_LABELS[access.kind]} ended ${formatDate(access.until)}. Free plan now: browse, reply and accept requests.`;
+  else if (access.kind === "complimentary") summary = `Complimentary until ${formatDate(access.until)}${access.setBy ? `, set by ${gate.policy.staffName(access.setBy) ?? "staff"}` : ""}.`;
+  else if (access.kind === "founding") summary = `Founding member: free until ${formatDate(access.until)}.`;
+  else summary = `Paid subscription (test mode) until ${formatDate(access.until)}.`;
+
+  return (
+    <section className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10" data-testid="membership">
+      <h2 className="font-heading text-lg font-semibold">Membership</h2>
+      <p>{summary}</p>
+      <p className="text-xs text-muted-foreground">
+        {active ? "You can start conversations." : "Starting a conversation needs a membership; replying stays free."} Founding
+        promotion: {founding.taken} of {founding.total} places taken.
+      </p>
+      {!active && viewer.status === "approved" ? (
+        <form action={subscribeAction}>
+          <SubmitButton size="sm" pendingLabel="Starting test subscription...">
+            <CreditCard aria-hidden /> Subscribe in test mode
+          </SubmitButton>
+        </form>
+      ) : null}
+    </section>
+  );
+}
+
+export default async function MePage({ searchParams }: { searchParams: Promise<RawParams> }) {
+  const message = pick(NOTICES, param(await searchParams, "notice"));
   const gate = await getGate();
   const { viewer, policy } = gate;
   if (!viewer) return <MembersOnlyScreen />;
   if (viewer.role !== "member") redirect("/moderate");
 
-  const message = notice ? NOTICES[notice] : undefined;
   const blocked = policy.listBlockedByViewer(viewer);
+  const details = describe(EXTRA_FIELDS, viewer.extra);
+  const faith = describe(FAITH_FIELDS, viewer.faith.answers);
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,12 +168,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
             <p className="text-sm font-medium">Reason: {viewer.decision.reason}</p>
           ) : null}
         </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={viewer.status} className="text-sm" />
-          {viewer.status === "pending" && !viewer.submittedAt ? (
-            <Button asChild size="sm"><Link href="/join/verify">Add photo and video</Link></Button>
-          ) : null}
-        </div>
+        <StatusBadge status={displayStatus(viewer)} className="self-start text-sm sm:self-center" />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
@@ -124,6 +176,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
         <MediaManager gate={gate} viewer={viewer} kind="video" />
 
         <div className="flex flex-col gap-6">
+          <Membership gate={gate} viewer={viewer} />
           <section className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10">
             <h2 className="font-heading text-lg font-semibold">Details</h2>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
@@ -131,16 +184,30 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
               <dt className="text-muted-foreground">Lives in</dt><dd>{viewer.city}, {countryName(viewer.country)}</dd>
               <dt className="text-muted-foreground">Languages</dt><dd>{viewer.languages.join(", ")}</dd>
               <dt className="text-muted-foreground">Looking for</dt><dd>{viewer.lookingFor ? LOOKING_FOR_LABELS[viewer.lookingFor] : "Not stated"}</dd>
-              <dt className="text-muted-foreground">Faith</dt><dd>{viewer.faith.value ?? "Not shared"}</dd>
+              {details.map((d) => (
+                <div key={d.label} className="contents">
+                  <dt className="text-muted-foreground">{d.label}</dt><dd>{d.value}</dd>
+                </div>
+              ))}
+              <dt className="text-muted-foreground">Faith</dt>
+              <dd>{faith.length > 0 ? faith.map((f) => f.value).join(" · ") : viewer.faith.consentedAt ? "Consent given, nothing filled in" : "Not shared"}</dd>
             </dl>
           </section>
           <section className="flex flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10">
             <h2 className="font-heading text-lg font-semibold">Consent record</h2>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
               <dt className="text-muted-foreground">Terms</dt>
-              <dd>{viewer.terms ? `Version ${viewer.terms.version}, accepted ${new Date(viewer.terms.acceptedAt).toUTCString().slice(5, 22)} UTC` : "Not recorded"}</dd>
+              <dd>
+                {viewer.terms ? (
+                  <>
+                    <Link href="/terms" className="text-primary underline underline-offset-2">Version {viewer.terms.version}</Link>, accepted {formatDateTime(viewer.terms.acceptedAt)}
+                  </>
+                ) : (
+                  "Not recorded"
+                )}
+              </dd>
               <dt className="text-muted-foreground">Faith data</dt>
-              <dd>{viewer.faith.consentedAt ? `Consent given ${new Date(viewer.faith.consentedAt).toUTCString().slice(5, 22)} UTC` : "No consent, nothing stored"}</dd>
+              <dd>{viewer.faith.consentedAt ? `Consent given ${formatDateTime(viewer.faith.consentedAt)}` : "No consent, nothing stored"}</dd>
             </dl>
           </section>
           {viewer.status === "approved" ? (
@@ -153,7 +220,7 @@ export default async function MePage({ searchParams }: { searchParams: Promise<{
                     <span>{member.displayName}</span>
                     <form action={unblockAction}>
                       <input type="hidden" name="targetId" value={member.id} />
-                      <Button type="submit" variant="outline" size="xs">Unblock</Button>
+                      <SubmitButton variant="outline" size="xs" pendingLabel="Unblocking...">Unblock</SubmitButton>
                     </form>
                   </li>
                 ))}
