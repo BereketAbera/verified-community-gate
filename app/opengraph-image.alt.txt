@@ -1,0 +1,1 @@
+Trust gate demo. Nobody is visible until a person has checked their video. The same member, shown by the initials HT, goes from pending review, hidden from everyone, to approved and visible to approved members once a person has compared their video with their photo.

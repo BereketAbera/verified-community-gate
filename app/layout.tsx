@@ -9,10 +9,16 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const serif = Source_Serif_4({ variable: "--font-serif", subsets: ["latin"], weight: ["500", "600"] });
 
+const description = "Verified community: hidden by default, video-checked by a person";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://verified-community-gate.vercel.app"),
   title: { default: "Trust gate demo", template: "%s · Trust gate demo" },
-  description: "Verified community: hidden by default, video-checked by a person",
+  description,
   robots: { index: false, follow: false },
+  // The image is app/opengraph-image.png (design/make_brand.py); Next.js adds its URL, size and alt text.
+  openGraph: { title: "Trust gate demo", description, siteName: "Trust gate demo", type: "website" },
+  twitter: { card: "summary_large_image", title: "Trust gate demo", description },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
