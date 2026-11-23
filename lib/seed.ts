@@ -273,7 +273,7 @@ export const SEED_CONVERSATIONS: readonly Conversation[] = [
     messages: [
       msg("m02", "2026-11-20T18:40:00Z", "Hi Amara, I saw you like long walks. Do you have a favourite route in Toronto?"),
       msg("m01", "2026-11-21T08:15:00Z", "The waterfront trail, early on a Sunday. And a good book for the bench at the end."),
-      msg("m02", "2026-11-21T19:12:00Z", "A good book for the bench sounds right. What are you reading at the moment?"),
+      msg("m02", "2026-11-21T19:12:00Z", "Sunday mornings on the waterfront sound hard to beat. What are you reading at the moment?"),
     ],
   },
   {
