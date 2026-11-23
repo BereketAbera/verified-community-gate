@@ -3,19 +3,22 @@ import { ShieldCheck } from "lucide-react";
 import { getGate } from "@/lib/server/gate";
 import { IdentitySwitcher, type IdentityOption } from "./identity-switcher";
 import { NavLinks } from "./nav-links";
-import { StatusBadge } from "./status-badge";
+import { displayStatus, StatusBadge } from "./status-badge";
+
+/** Identities are named by person, not by status; the badge beside the menu shows the live status. */
+export function identityOptions(hasSignedUp: boolean, selfName: string | null): IdentityOption[] {
+  return [
+    { value: "visitor", label: "Visitor", detail: "Signed out" },
+    { value: "newcomer", label: "Your signup", detail: hasSignedUp && selfName ? `${selfName}, the profile you created` : "A new member: sign up and verify" },
+    { value: "member", label: "Amara (member)", detail: "Amara Okafor, approved member on the free plan" },
+    { value: "moderator", label: "Morgan (moderator)", detail: "Morgan Lee, reviews new profiles" },
+    { value: "admin", label: "Riley (admin)", detail: "Riley Park, can also suspend and ban" },
+  ];
+}
 
 export async function SiteHeader() {
   const gate = await getGate();
   const { identity, viewer, policy } = gate;
-
-  const options: IdentityOption[] = [
-    { value: "visitor", label: "Visitor", detail: "Signed out" },
-    { value: "newcomer", label: "New member (pending)", detail: gate.hasSignedUp ? "Your own signup" : "Sign up and verify" },
-    { value: "member", label: "Approved member", detail: "Amara Okafor" },
-    { value: "moderator", label: "Moderator", detail: "Morgan Lee" },
-    { value: "admin", label: "Admin", detail: "Riley Park" },
-  ];
 
   const nav: Array<{ href: string; label: string }> = [];
   if (viewer?.role === "member") {
@@ -35,8 +38,10 @@ export async function SiteHeader() {
             Demo identities, no real sign-in
           </p>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {viewer && viewer.role === "member" ? <StatusBadge status={viewer.status} className="hidden sm:inline-flex" /> : null}
-            <IdentitySwitcher current={identity} options={options} />
+            {viewer && viewer.role === "member" ? (
+              <StatusBadge status={displayStatus(viewer)} className="bg-card" />
+            ) : null}
+            <IdentitySwitcher current={identity} options={identityOptions(gate.hasSignedUp, gate.selfName)} />
             <form method="post" action="/api/reset">
               <button type="submit" className="rounded-md px-1.5 py-1 whitespace-nowrap text-secondary-foreground/80 underline-offset-4 hover:text-secondary-foreground hover:underline sm:px-2">
                 Reset demo
@@ -46,13 +51,13 @@ export async function SiteHeader() {
         </div>
       </div>
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
-        <Link href="/" className="group flex items-center gap-3">
+        <Link href="/" className="group flex items-center gap-3 self-start rounded-lg">
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShieldCheck className="size-5" aria-hidden />
           </span>
           <span className="leading-tight">
             <span className="block font-heading text-lg font-semibold tracking-tight">Trust gate demo</span>
-            <span className="block text-xs text-muted-foreground sm:text-sm">Verified community: hidden by default, video-checked by a person</span>
+            <span className="hidden text-xs text-muted-foreground sm:block sm:text-sm">Verified community: hidden by default, video-checked by a person</span>
           </span>
         </Link>
         <NavLinks items={nav} />

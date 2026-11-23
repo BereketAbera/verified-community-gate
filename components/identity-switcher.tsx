@@ -28,7 +28,7 @@ export function IdentitySwitcher({ current, options }: { current: Identity; opti
   return (
     <form ref={formRef} method="post" action="/api/identity">
       <input ref={inputRef} type="hidden" name="as" defaultValue={current} />
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" data-testid="identity-trigger" className="bg-card">
             <UserRound aria-hidden />
@@ -37,7 +37,7 @@ export function IdentitySwitcher({ current, options }: { current: Identity; opti
             <ChevronDown aria-hidden />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuLabel>Switch demo identity</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {options.map((option) => (

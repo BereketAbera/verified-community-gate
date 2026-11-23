@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export function NavLinks({ items }: { items: Array<{ href: string; label: string }> }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Main" className="-mx-1 flex gap-1 overflow-x-auto whitespace-nowrap [scrollbar-width:none] lg:overflow-visible">
+    <nav aria-label="Main" className="-mx-1 flex flex-wrap gap-1 whitespace-nowrap">
       {items.map((item) => {
         const active =
           item.href === "/moderate"

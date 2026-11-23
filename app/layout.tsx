@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
+import { NavigationProgress } from "@/components/navigation-progress";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -17,12 +19,22 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${serif.variable}`}>
       <body className="flex min-h-dvh flex-col font-sans antialiased">
+        <a
+          href="#main"
+          className="sr-only rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50"
+        >
+          Skip to content
+        </a>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <SiteHeader />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 outline-none sm:px-6 sm:py-10">
+          {children}
+        </main>
         <footer className="border-t border-border/80">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground sm:px-6">
             <p>Sample by Bereket A. · fictional people and media</p>
-            <p className="text-xs">Demo identities, no real sign-in. State lives in an encrypted cookie in your browser.</p>
           </div>
         </footer>
       </body>

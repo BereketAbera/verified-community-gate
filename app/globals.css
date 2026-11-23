@@ -65,7 +65,8 @@
   --accent-foreground: oklch(0.3 0.04 210);
   --destructive: oklch(0.55 0.17 25);
   --border: oklch(0.9 0.008 85);
-  --input: oklch(0.88 0.008 85);
+  /* Form control borders: at least 3:1 against cards and the page (WCAG 1.4.11). */
+  --input: oklch(0.62 0.02 250);
   --ring: oklch(0.6 0.06 200);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -119,7 +120,12 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
+  }
+  /* A clear keyboard focus ring for links, summaries and custom controls. Buttons and inputs add their own ring. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
   body {
     @apply bg-background text-foreground;
@@ -137,5 +143,23 @@
   }
   .prose-plain p + p {
     @apply mt-3;
+  }
+  /* Thin progress bar shown while a link click is waiting for the next page. */
+  .nav-progress {
+    animation: nav-progress 1.2s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-progress {
+      animation: none;
+    }
+  }
+}
+
+@keyframes nav-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
   }
 }
