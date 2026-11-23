@@ -15,6 +15,9 @@ const LABELS: Record<AuditAction, string> = {
   visibility_changed: "Visibility changed",
   block: "Blocked",
   unblock: "Unblocked",
+  report: "Reported",
+  reports_cleared: "Reports reviewed",
+  access_changed: "Membership changed",
 };
 
 const TONES: Partial<Record<AuditAction, string>> = {
@@ -25,6 +28,7 @@ const TONES: Partial<Record<AuditAction, string>> = {
   suspend: "bg-orange-50 text-orange-900 ring-orange-200",
   flag: "bg-amber-50 text-amber-900 ring-amber-200",
   media_replaced: "bg-amber-50 text-amber-900 ring-amber-200",
+  report: "bg-orange-50 text-orange-900 ring-orange-200",
 };
 
 export function AuditActionBadge({ action }: { action: AuditAction }) {
