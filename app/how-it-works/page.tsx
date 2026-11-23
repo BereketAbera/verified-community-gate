@@ -65,8 +65,8 @@ function Section({ id, step, title, children }: { id: string; step: string; titl
   return (
     <section id={id} className="scroll-mt-24 border-t pt-10">
       <p className="eyebrow">{step}</p>
-      <h2 className="mt-1 mb-4 font-heading text-2xl font-semibold tracking-tight">{title}</h2>
-      <div className="flex flex-col gap-4 text-base leading-relaxed text-foreground/90">{children}</div>
+      <h2 className="mt-1 mb-4 font-heading text-2xl font-semibold tracking-tight text-balance">{title}</h2>
+      <div className="flex flex-col gap-4 text-base leading-relaxed text-pretty text-foreground/90">{children}</div>
     </section>
   );
 }
@@ -91,7 +91,7 @@ export default async function HowItWorksPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-10">
       <PageTitle eyebrow="How it works" title="How profiles stay hidden and media stays private">
-        Every read asks one policy module. Photos and videos open only through a link that expires in 60 seconds and is
+        Every read asks one policy module. Photos and videos open only through a link that expires in 60&nbsp;seconds and is
         checked again when used. Nobody becomes visible until a moderator has compared their video with their photo.
       </PageTitle>
 
@@ -230,7 +230,7 @@ export default async function HowItWorksPage() {
         <SignedLinkDiagram />
         <ol className="flex list-decimal flex-col gap-2 pl-5">
           <li>The files live in <code className={mono}>private-media/</code>, outside <code className={mono}>public/</code>. No URL points at them.</li>
-          <li>When a page needs a photo or video, it asks the policy first. Only if the answer is yes does the server issue a link: an HMAC-SHA256 over the asset id, the viewer and an expiry 60 seconds away.</li>
+          <li>When a page needs a photo or video, it asks the policy first. Only if the answer is yes does the server issue a link: an HMAC-SHA256 over the asset id, the viewer and an expiry 60&nbsp;seconds away.</li>
           <li>The viewer is not in the URL. The media route takes the viewer from the session and recomputes the signature, so a copied link fails for anyone else, including a signed-out browser.</li>
           <li>The route then asks the policy again. If the owner was suspended, went private or blocked the viewer in the meantime, the answer is 404.</li>
           <li>A page restored by Back after its links expired asks for fresh links, and the policy is asked again each time.</li>

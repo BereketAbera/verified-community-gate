@@ -136,7 +136,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
             <h3 className="font-heading text-xl leading-snug font-medium text-balance" data-slot="card-title">How is a private video kept from anyone not approved?</h3>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-            <p>The files sit outside the public folder, so no URL reaches them directly. The only way in is a media route that needs a signature over the asset, the viewer and an expiry 60 seconds away.</p>
+            <p>The files sit outside the public folder, so no URL reaches them directly. The only way in is a media route that needs a signature over the asset, the viewer and an expiry 60&nbsp;seconds away.</p>
             <p>The link is issued only after the policy says yes, and the policy is asked again when the link is used. A private file is visible to its owner and to moderators, nobody else.</p>
             <Link href="/how-it-works#media" className="font-medium text-primary underline-offset-4 hover:underline">Read the signed-link flow</Link>
           </CardContent>
