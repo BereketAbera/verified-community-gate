@@ -47,7 +47,11 @@ changes are pure functions in `lib/domain.ts` that ask the same policy for permi
 fixed ones, 2:00 to 5:00 long, and a moderator's ticks for the same person, every prompt and every language. The
 checklist is saved in the audit log with the approval.
 
-**Signed media links.** `lib/media-signing.ts` issues `/api/media/<asset>?exp=<unix>&sig=<hmac>` only after the policy
+**Signed media links.**
+
+![The signed-link flow: the server asks the policy before it issues a link; the media route checks the signature and asks the policy again when the link is used. Refusals: no link, 403, 404.](design/signed-link-flow.png)
+
+`lib/media-signing.ts` issues `/api/media/<asset>?exp=<unix>&sig=<hmac>` only after the policy
 allows it. The viewer is not in the URL: the media route recomputes the signature with the viewer from the session,
 compares it in constant time, checks the expiry, then asks the policy again. Responses:
 

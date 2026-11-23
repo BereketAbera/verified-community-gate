@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Check, CircleDashed, Clock3, Minus } from "lucide-react";
 import { CodeBlock } from "@/components/code-block";
 import { PageTitle } from "@/components/page-title";
+import { SignedLinkDiagram } from "@/components/signed-link-diagram";
 import { FOUNDING } from "@/lib/access";
 import { createPolicy } from "@/lib/policy";
 import { freshSandbox } from "@/lib/sandbox";
@@ -226,6 +227,7 @@ export default async function HowItWorksPage() {
       </Section>
 
       <Section id="media" step="Step 4" title="Private media: signed, short-lived, checked twice">
+        <SignedLinkDiagram />
         <ol className="flex list-decimal flex-col gap-2 pl-5">
           <li>The files live in <code className={mono}>private-media/</code>, outside <code className={mono}>public/</code>. No URL points at them.</li>
           <li>When a page needs a photo or video, it asks the policy first. Only if the answer is yes does the server issue a link: an HMAC-SHA256 over the asset id, the viewer and an expiry 60 seconds away.</li>
