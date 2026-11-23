@@ -5,11 +5,14 @@ The steps are data (STEPS below), and two layouts are drawn from the same list:
 - wide: three lanes (the member's browser, the server, the media route), shown from 1024 px up;
 - narrow: one column with the lane named above each group, shown on phones and tablets.
 
-Teal is the path a request takes when every check passes. Grey marks where it is refused.
+Teal arrows are the path a request takes when every check passes. A slashed circle marks where it
+is refused. Box outlines use the site's --border colour and the lifelines are the muted grey at 35%,
+so the diagram's lines are no heavier than the card around it.
 
 Writes components/signed-link-diagram.tsx (inline SVG that uses the page's own fonts, so the
 text stays sharp and selectable) and build/diagram/signed-link-{wide,narrow}.svg with the font
-names spelled out, which design/build.sh renders to design/signed-link-flow.png for the README.
+names spelled out, a 16-unit margin and a thin frame, which design/build.sh renders to
+design/signed-link-flow.png for the README.
 Text widths come from build/fonts/Geist.ttf when design/extract_fonts.py has run; otherwise an
 average glyph width is used. Standard library only.
 
@@ -27,9 +30,10 @@ TEAL = "#165a5e"
 INK = "#1a222b"
 GREY = "#5b646f"
 TINT = "#e9f2f3"
-BORDER = "#cbd5d5"
-LIFELINE = "#c3cccb"
+BORDER = "#e0ded8"  # --border
+LIFELINE_OPACITY = "0.35"  # the lifelines are GREY at this opacity
 CARD = "#ffffff"
+PAD = 16  # margin around the standalone SVGs, so the README image does not touch its edges
 
 LANES = ["Member's browser", "Server: page and policy", "Media route"]
 BROWSER, SERVER, MEDIA = 0, 1, 2
@@ -46,14 +50,17 @@ STEPS = [
     {"kind": "check", "lane": MEDIA, "text": "Policy asked again: still allowed?", "no": "No (suspended, private, blocked): 404"},
     {"kind": "send", "from": MEDIA, "to": BROWSER, "text": "Sends the file", "note": "200 · Cache-Control: private, no-store", "note_font": "mono"},
 ]
-FOOTNOTE = "An expired link gets 403, and the page asks for a fresh one, so the policy is asked again."
+FOOTNOTE = (
+    "A slashed circle marks where a request stops. An expired link gets 403; the page then asks for a fresh one, "
+    "so the policy is asked again."
+)
 SUMMARY = (
     "Diagram of the signed-link flow. The server asks the policy before it issues a link, and the media route checks "
     "the signature and asks the policy again when the link is used. A request is refused with no link, with 403 for "
     "a wrong or expired signature, or with 404 when the policy says no. The same steps are listed below."
 )
-# On the page the footnote joins the caption under the figure; the README image carries it inside.
-CAPTION = "Teal is the path when every check passes; grey marks where a request stops. " + FOOTNOTE
+# On the page the footnote is the caption under the figure; the README image carries it inside.
+CAPTION = FOOTNOTE
 
 FONTS = {"serif": ("Source Serif 4", "font-heading"), "sans": ("Geist", "font-sans"), "mono": ("Geist Mono", "font-mono")}
 LANE_SIZE, LABEL_SIZE, DETAIL_SIZE, MONO_SIZE = 16, 14, 13, 12
@@ -167,12 +174,14 @@ def txt(x, y, s, size, font="sans", weight=400, fill=INK, anchor="start", limit=
 def rect(x, y, w, h, rx, fill, stroke=None):
     attrs = {"x": x, "y": y, "width": w, "height": h, "rx": rx, "fill": fill}
     if stroke:
-        attrs.update({"stroke": stroke, "stroke-width": 1.5})
+        attrs.update({"stroke": stroke, "stroke-width": 1})
     return el("rect", attrs)
 
 
-def line(x1, y1, x2, y2, colour, dash=None):
+def line(x1, y1, x2, y2, colour, dash=None, opacity=None):
     attrs = {"x1": x1, "y1": y1, "x2": x2, "y2": y2, "stroke": colour, "stroke-width": 1.5}
+    if opacity:
+        attrs["stroke-opacity"] = opacity
     if dash:
         attrs["stroke-dasharray"] = dash
     return el("line", attrs)
@@ -239,8 +248,8 @@ def send_label(cx, y, step, limit):
 
 def wide():
     w = 880
-    lane_x = [135, 430, 725]
-    box_w = 284
+    lane_x = [150, 440, 730]  # centred: the lane pills leave 30 units on each side
+    box_w = 276
     body, y = [], 64
     for step in STEPS:
         if step["kind"] == "send":
@@ -256,11 +265,14 @@ def wide():
     end = y - 2
     lanes = []
     for i, name in enumerate(LANES):
-        lanes.append(line(lane_x[i], 40, lane_x[i], end, LIFELINE, "3 5"))
+        lanes.append(line(lane_x[i], 40, lane_x[i], end, GREY, "3 5", LIFELINE_OPACITY))
         lanes.append(rect(lane_x[i] - 120, 0, 240, 40, 8, TINT))
         lanes.append(txt(lane_x[i], 26, name, LANE_SIZE, "serif", 600, anchor="middle", limit=224))
-    foot = [txt(15, end + 30, FOOTNOTE, DETAIL_SIZE, fill=GREY, limit=w - 30)]
-    return w, end + 4, end + 44, lanes + body, foot
+    foot, fy = [], end + 30
+    for line_text in wrap(FOOTNOTE, DETAIL_SIZE, w - 60):
+        foot.append(txt(30, fy, line_text, DETAIL_SIZE, fill=GREY))
+        fy += LINE
+    return w, end + 4, fy - 4, lanes + body, foot
 
 
 def narrow():
@@ -349,10 +361,13 @@ def render(node, mode, depth):
 
 
 def standalone(w, h, nodes):
+    """The diagram on a white card with a PAD margin and a 1-unit frame in the border colour."""
     body = "\n".join(render(n, "svg", 1) for n in nodes)
+    fw, fh = w + 2 * PAD, h + 2 * PAD
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{num(w)}" height="{num(h)}" viewBox="0 0 {num(w)} {num(h)}">\n'
-        f'  <rect width="{num(w)}" height="{num(h)}" fill="{CARD}"/>\n{body}\n</svg>\n'
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{num(fw)}" height="{num(fh)}" viewBox="{-PAD} {-PAD} {num(fw)} {num(fh)}">\n'
+        f'  <rect x="{-PAD + 0.5}" y="{-PAD + 0.5}" width="{num(fw - 1)}" height="{num(fh - 1)}" rx="12" fill="{CARD}" stroke="{BORDER}"/>\n'
+        f"{body}\n</svg>\n"
     )
 
 
@@ -373,7 +388,7 @@ const SUMMARY =
 
 export function SignedLinkDiagram() {{
   return (
-    <figure className="flex flex-col gap-3 rounded-xl bg-card p-3 ring-1 ring-foreground/10 sm:p-5" data-testid="signed-link-diagram">
+    <figure className="flex w-full max-w-[364px] flex-col gap-3 rounded-xl bg-card p-3 ring-1 ring-foreground/10 sm:max-w-[380px] sm:p-5 lg:max-w-none" data-testid="signed-link-diagram">
       <div role="img" aria-label={{SUMMARY}}>
 {wide}
 {narrow}
@@ -402,7 +417,7 @@ def main():
         COMPONENT.format(
             summary=json.dumps(SUMMARY),
             wide=inline(ww, wh, wide_nodes, "hidden h-auto w-full lg:block"),
-            narrow=inline(nw, nh, narrow_nodes, "mx-auto block h-auto w-full max-w-[400px] lg:hidden"),
+            narrow=inline(nw, nh, narrow_nodes, "block h-auto w-full lg:hidden"),
             caption=CAPTION,
         ),
     )

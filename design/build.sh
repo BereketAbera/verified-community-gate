@@ -34,8 +34,8 @@ python3 design/make_brand.py ico
 "$INKSCAPE" build/brand/og.svg --export-type=png --export-width=1200 \
   --export-png-color-mode=RGB_8 --export-png-compression=9 --export-filename=app/opengraph-image.png
 
-# 6. The signed-link diagram at 2x for the README. The page draws the same diagram inline.
-"$INKSCAPE" build/diagram/signed-link-wide.svg --export-type=png --export-width=1760 \
+# 6. The signed-link diagram at 2x for the README (912 units with its margin). The page draws the same diagram inline.
+"$INKSCAPE" build/diagram/signed-link-wide.svg --export-type=png --export-width=1824 \
   --export-png-color-mode=RGB_8 --export-png-compression=9 --export-filename=design/signed-link-flow.png
 
 ls -l app/icon.svg app/favicon.ico app/apple-icon.png app/opengraph-image.png design/signed-link-flow.png \
