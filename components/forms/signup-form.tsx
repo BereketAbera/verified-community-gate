@@ -13,7 +13,7 @@ import { COUNTRIES, LANGUAGES, LOOKING_FOR_LABELS, TERMS_VERSION } from "@/lib/r
 import { LOOKING_FOR } from "@/lib/types";
 import { describedBy, Field, GroupField } from "./field";
 
-const COUNTRY_HINT = "A moderator reviews every signup before the profile is visible.";
+const COUNTRY_HINT = "Shown on your profile with your city.";
 const LANGUAGES_HINT = "Your video answers each prompt in every language you tick.";
 const ABOUT_HINT = "Optional, up to 280 characters.";
 

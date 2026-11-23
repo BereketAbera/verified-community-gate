@@ -90,9 +90,9 @@ export default async function HowItWorksPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-10">
-      <PageTitle eyebrow="How it works" title="One gate, short-lived links, a person in the loop">
-        Three ideas carry the whole demo. Every read asks one policy module. Media is reachable only through a link that
-        expires in a minute and is checked again when used. And nobody becomes visible until a moderator has looked.
+      <PageTitle eyebrow="How it works" title="How profiles stay hidden and media stays private">
+        Every read asks one policy module. Photos and videos open only through a link that expires in 60 seconds and is
+        checked again when used. Nobody becomes visible until a moderator has compared their video with their photo.
       </PageTitle>
 
       <nav aria-label="On this page" className="grid gap-2 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10 sm:grid-cols-3">
@@ -211,7 +211,7 @@ export default async function HowItWorksPage() {
         </p>
       </Section>
 
-      <Section id="verification" step="Step 3" title="Verification: five prompts, every language, a person decides">
+      <Section id="verification" step="Step 3" title="Verification: five prompts in every language, checked by a moderator">
         <p>
           A new member records a 2 to 5 minute video answering five prompts, three asked of everyone and two they choose, in
           every language on their profile. The moderator watches it beside the photo and ticks what they saw and heard: the same
@@ -226,7 +226,7 @@ export default async function HowItWorksPage() {
         </p>
       </Section>
 
-      <Section id="media" step="Step 4" title="Private media: signed, short-lived, checked twice">
+      <Section id="media" step="Step 4" title="Private media: a 60-second link, checked again when it is used">
         <SignedLinkDiagram />
         <ol className="flex list-decimal flex-col gap-2 pl-5">
           <li>The files live in <code className={mono}>private-media/</code>, outside <code className={mono}>public/</code>. No URL points at them.</li>

@@ -91,7 +91,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
         </div>
         <ul className="grid gap-3 text-sm">
           {[
-            { icon: EyeOff, text: "Pending, rejected, suspended and banned accounts never appear in search, profiles or messages, and two members who block each other vanish for each other." },
+            { icon: EyeOff, text: "Pending, rejected, suspended and banned accounts never appear in search, profiles or messages, and a block in either direction hides two members from each other." },
             { icon: KeyRound, text: "Media is served only through 60-second signed links, bound to the viewer and re-checked on every request." },
             { icon: FileCheck2, text: "One policy module answers every read. Table-driven tests cover each status, role and block direction." },
           ].map(({ icon: Icon, text }) => (
@@ -133,7 +133,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
         <Card>
           <CardHeader>
             <p className="eyebrow">Your Q2</p>
-            <h3 className="font-heading text-xl leading-snug font-medium" data-slot="card-title">How is a private video kept from anyone not approved?</h3>
+            <h3 className="font-heading text-xl leading-snug font-medium text-balance" data-slot="card-title">How is a private video kept from anyone not approved?</h3>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
             <p>The files sit outside the public folder, so no URL reaches them directly. The only way in is a media route that needs a signature over the asset, the viewer and an expiry 60 seconds away.</p>
@@ -144,7 +144,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Raw
         <Card>
           <CardHeader>
             <p className="eyebrow">Your Q3</p>
-            <h3 className="font-heading text-xl leading-snug font-medium" data-slot="card-title">How does a pending account stay unseen and unseeing?</h3>
+            <h3 className="font-heading text-xl leading-snug font-medium text-balance" data-slot="card-title">How is a pending account kept from seeing or being seen?</h3>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
             <p>Search, member pages, messages and media all ask one function whether a viewer may see a profile. It says yes only when both people are approved and neither has blocked the other.</p>
