@@ -42,7 +42,7 @@ const STEPS = [
   "As Your signup, fill in the form (or use sample answers), pick a photo, a video and two prompts, and submit. Search shows nobody, and /members/m02 returns 404.",
   "As Morgan (moderator), open your signup, tick the checklist beside the video and approve it.",
   "Switch to Amara (member) and find the profile you just approved in search.",
-  "As Amara, open Daniel: starting a conversation asks for a subscription (test mode). Priya's request in Messages can be accepted for free.",
+  "As Amara, open Lucía: starting a conversation asks for a subscription (test mode). Priya's request in Messages can be accepted for free.",
   "As Amara, report Samuel. He already has two reports, so yours hides him until a moderator reviews them.",
   "As Amara, set your video to private, then replace it: your profile goes back to review and disappears.",
   "As Riley (admin), suspend a member, then reinstate them: they return to the status they had before.",
