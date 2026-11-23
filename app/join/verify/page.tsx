@@ -20,7 +20,7 @@ export default async function VerifyPage() {
   if (viewer.submittedAt && viewer.status !== "rejected") {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
-        <PageTitle eyebrow="Step 2 of 2" title="Verification submitted" />
+        <PageTitle eyebrow="Step 3 of 4 · review" title="Verification submitted" />
         <Notice title="Waiting for a moderator">Your photo and video are in the review queue. You can replace them from your profile, which restarts the review.</Notice>
         <Button asChild className="self-start">
           <Link href="/me">Go to my profile</Link>
@@ -39,7 +39,7 @@ export default async function VerifyPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col">
-      <PageTitle eyebrow="Step 2 of 2 · verification" title="Your photo and verification video">
+      <PageTitle eyebrow="Step 2 of 4 · photo and video" title="Your photo and verification video">
         Record a 2 to 5 minute video answering five prompts, three fixed and two you choose, in every language you ticked. A
         moderator compares the person in the video with your photo before anyone can see your profile.
       </PageTitle>

@@ -42,7 +42,7 @@ export default async function JoinPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col">
-      <PageTitle eyebrow="Step 1 of 2 · new member" title="Create your profile">
+      <PageTitle eyebrow="Step 1 of 4 · profile" title="Create your profile">
         Your profile stays hidden from everyone until a moderator has compared your verification video with your photo.
         Nobody can see you, and you cannot see anyone, until then.
       </PageTitle>
