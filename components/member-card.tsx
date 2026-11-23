@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { countryName, LOOKING_FOR_LABELS } from "@/lib/reference";
-import type { Account } from "@/lib/types";
-import type { SignedLink } from "@/lib/types";
+import type { Account, SignedLink } from "@/lib/types";
 import { MediaPlaceholder } from "./media-placeholder";
+import { SignedImage } from "./signed-image";
 
 export function MemberCard({ member, photo, photoPrivate }: { member: Account; photo: SignedLink | null; photoPrivate: boolean }) {
+  const placeholder = <MediaPlaceholder kind="photo" reason={photoPrivate ? "private" : "none"} className="aspect-[4/3] rounded-none ring-0" hidden />;
   return (
     <Link
       href={`/members/${member.id}`}
@@ -14,10 +15,10 @@ export function MemberCard({ member, photo, photoPrivate }: { member: Account; p
       className="group flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition hover:shadow-md hover:ring-foreground/20"
     >
       {photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={photo.url} alt={`Photo of ${member.displayName}`} className="aspect-[4/3] w-full object-cover object-[50%_35%]" />
+        // The name follows in the link text, so the photo itself is decorative here.
+        <SignedImage link={photo} alt="" className="aspect-[4/3] w-full object-cover object-[50%_30%]" fallback={placeholder} />
       ) : (
-        <MediaPlaceholder kind="photo" reason={photoPrivate ? "private" : "none"} className="aspect-[4/3] rounded-none ring-0" />
+        placeholder
       )}
       <div className="flex flex-1 flex-col gap-1 p-3 sm:gap-1.5 sm:p-4">
         <p className="font-heading text-base leading-tight font-semibold group-hover:underline group-hover:underline-offset-4 sm:text-lg">
