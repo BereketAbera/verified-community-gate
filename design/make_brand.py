@@ -59,8 +59,8 @@ PHOTO = (1.5, 7.5, 13, 17)
 VIDEO = (17.5, 7.5, 13, 17)
 CORNER = 2.6
 
-# Two weights of the same drawing. The small one has a thicker frame, a bigger head and a
-# smaller play triangle with more room around it, so the favicon still reads at 16 to 32 px.
+# Two weights of the same drawing. The small one has a thicker frame and a bigger head and
+# shoulders, so the favicon still reads at 16 to 32 px.
 REGULAR = {"frame": 2.2, "head": 2.5, "head_y": 13.4, "shoulders": (4.4, 3.8), "play": [(22.3, 13.3), (22.3, 18.7), (26.7, 16.0)]}
 SMALL = {"frame": 2.8, "head": 2.9, "head_y": 13.2, "shoulders": (4.7, 4.0), "play": [(22.1, 13.0), (22.1, 19.0), (26.3, 16.0)]}
 

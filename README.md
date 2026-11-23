@@ -132,6 +132,7 @@ private-media/            fictional portraits and clips, outside public/
 tests/unit/               Vitest suites
 e2e/                      Playwright suites
 scripts/make-media.mjs    rebuilds the fictional portraits and clips (needs ffmpeg and rsvg-convert)
+design/                   the mark, icons, social card and signed-link diagram (Python and Inkscape; see DESIGN-NOTES.md)
 ```
 
 ## Your Phase 1 list against this sample
