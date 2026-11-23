@@ -7,5 +7,5 @@ export default defineConfig({
   workers: 1,
   timeout: 120_000,
   reporter: "list",
-  use: { baseURL: process.env.BASE_URL ?? "http://localhost:4372", channel: "chrome" },
+  use: { baseURL: process.env.BASE_URL ?? "http://localhost:3302", channel: "chrome" },
 });

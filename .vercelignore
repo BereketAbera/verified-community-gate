@@ -2,7 +2,7 @@
 !.env.example
 .next
 node_modules
-generated
+test-output
 test-results
 playwright-report
 blob-report

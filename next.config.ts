@@ -6,8 +6,15 @@ const nextConfig: NextConfig = {
   // Keys are globs matched against route paths, hence the escaped brackets.
   outputFileTracingIncludes: {
     "/api/media/\\[assetId\\]": ["./private-media/**/*"],
-    "/how-it-works": ["./lib/policy.ts", "./lib/media-signing.ts", "./app/api/media/*/route.ts"],
-    "/tests": ["./generated/**/*", "./reports/**/*"],
+    "/how-it-works": [
+      "./lib/policy.ts",
+      "./lib/media-signing.ts",
+      "./lib/verification.ts",
+      "./lib/access.ts",
+      "./lib/billing.ts",
+      "./app/api/media/*/route.ts",
+    ],
+    "/tests": ["./test-output/**/*", "./reports/**/*"],
   },
   async headers() {
     return [

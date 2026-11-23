@@ -9,10 +9,10 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:report": "vitest run --reporter=default --reporter=json --outputFile.json=generated/unit-results.json",
+    "test:report": "vitest run --reporter=default --reporter=json --outputFile.json=test-output/unit-results.json",
     "test:e2e": "playwright test",
     "screens": "playwright test --config playwright.screens.config.ts",
-    "media": "node scripts/generate-media.mjs"
+    "media": "node scripts/make-media.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

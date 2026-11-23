@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Local runs start the production build on a spare port; set BASE_URL to test a deployment.
-const baseURL = process.env.BASE_URL ?? "http://localhost:4372";
+// Local runs start the production build on port 3302; set BASE_URL to test a deployment.
+const baseURL = process.env.BASE_URL ?? "http://localhost:3302";
 const local = !process.env.BASE_URL;
 
 export default defineConfig({
@@ -18,6 +18,6 @@ export default defineConfig({
   use: { baseURL, trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: local
-    ? { command: "pnpm exec next start --port 4372", url: baseURL, reuseExistingServer: false, timeout: 120_000 }
+    ? { command: "pnpm exec next start --port 3302", url: baseURL, reuseExistingServer: false, timeout: 120_000 }
     : undefined,
 });

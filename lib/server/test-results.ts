@@ -28,7 +28,7 @@ interface VitestJson {
 /** Results written by `pnpm test:report`, which the build runs before `next build`. */
 export async function readUnitRun(): Promise<UnitRun | null> {
   try {
-    const raw = JSON.parse(await readFile(path.join(process.cwd(), "generated", "unit-results.json"), "utf8")) as VitestJson;
+    const raw = JSON.parse(await readFile(path.join(process.cwd(), "test-output", "unit-results.json"), "utf8")) as VitestJson;
     return {
       total: raw.numTotalTests,
       passed: raw.numPassedTests,
