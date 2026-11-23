@@ -16,7 +16,7 @@ export function MemberCard({ member, photo, photoPrivate }: { member: Account; p
     >
       {photo ? (
         // The name follows in the link text, so the photo itself is decorative here.
-        <SignedImage link={photo} alt="" className="aspect-[4/3] w-full object-cover object-[50%_30%]" fallback={placeholder} />
+        <SignedImage link={photo} alt="" className="aspect-[4/3] w-full object-cover object-[50%_20%]" fallback={placeholder} />
       ) : (
         placeholder
       )}
