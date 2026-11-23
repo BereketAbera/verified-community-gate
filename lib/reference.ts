@@ -1,6 +1,7 @@
 import type { LookingFor } from "./types";
 
-export const TERMS_VERSION = "2026-11-01";
+/** Version of the community terms new members accept. The page lives at /terms. */
+export const TERMS_VERSION = "2026-07-15";
 
 export const COUNTRIES: ReadonlyArray<{ code: string; name: string }> = [
   { code: "US", name: "United States" },
@@ -73,33 +74,31 @@ export const LOOKING_FOR_LABELS: Record<LookingFor, string> = {
   marriage: "Marriage",
 };
 
-/** Sample media a new member can pick instead of uploading. Files live in private-media/. */
-export const SAMPLE_PHOTOS = [
-  { id: "sample-a", label: "Sample photo A", file: "photos/sample-a.jpg", tint: ["#e6c9a8", "#9a6240"] },
-  { id: "sample-b", label: "Sample photo B", file: "photos/sample-b.jpg", tint: ["#aec6e2", "#33557c"] },
-  { id: "sample-c", label: "Sample photo C", file: "photos/sample-c.jpg", tint: ["#d6d3ad", "#66653a"] },
-  { id: "sample-d", label: "Sample photo D", file: "photos/sample-d.jpg", tint: ["#e2bcbc", "#86505a"] },
+/**
+ * The fictional sample library a new member picks from instead of recording. Each sample
+ * person has a portrait and a short clip of the same face. A clip stands in for a recording
+ * of the length given here; real recordings are 2 to 5 minutes long.
+ */
+export const SAMPLE_PEOPLE = [
+  { id: "sample-a", label: "Sample person A", seconds: 185 },
+  { id: "sample-b", label: "Sample person B", seconds: 160 },
+  { id: "sample-c", label: "Sample person C", seconds: 250 },
+  { id: "sample-d", label: "Sample person D", seconds: 212 },
 ] as const;
 
-export const SAMPLE_VIDEOS = [
-  { id: "clip-1", label: "Sample video 1", file: "videos/clip-1.mp4", tint: ["#9cc4bb", "#2f5d62"] },
-  { id: "clip-2", label: "Sample video 2", file: "videos/clip-2.mp4", tint: ["#c9bedb", "#55497a"] },
-  { id: "clip-3", label: "Sample video 3", file: "videos/clip-3.mp4", tint: ["#e6c9a8", "#9a6240"] },
-  { id: "clip-4", label: "Sample video 4", file: "videos/clip-4.mp4", tint: ["#aec6e2", "#33557c"] },
-  { id: "clip-5", label: "Sample video 5", file: "videos/clip-5.mp4", tint: ["#d6d3ad", "#66653a"] },
-  { id: "clip-6", label: "Sample video 6", file: "videos/clip-6.mp4", tint: ["#e2bcbc", "#86505a"] },
-] as const;
-
-export type SamplePhotoId = (typeof SAMPLE_PHOTOS)[number]["id"];
-export type SampleVideoId = (typeof SAMPLE_VIDEOS)[number]["id"];
-
-export const SAMPLE_PHOTO_IDS = SAMPLE_PHOTOS.map((p) => p.id) as [SamplePhotoId, ...SamplePhotoId[]];
-export const SAMPLE_VIDEO_IDS = SAMPLE_VIDEOS.map((v) => v.id) as [SampleVideoId, ...SampleVideoId[]];
+export type SampleId = (typeof SAMPLE_PEOPLE)[number]["id"];
+export const SAMPLE_IDS = SAMPLE_PEOPLE.map((s) => s.id) as [SampleId, ...SampleId[]];
 
 export function sampleFile(kind: "photo" | "video", id: string): string | null {
-  const list: ReadonlyArray<{ id: string; file: string }> = kind === "photo" ? SAMPLE_PHOTOS : SAMPLE_VIDEOS;
-  return list.find((s) => s.id === id)?.file ?? null;
+  return SAMPLE_PEOPLE.some((s) => s.id === id) ? `${kind === "photo" ? "photos" : "videos"}/${id}.${kind === "photo" ? "jpg" : "mp4"}` : null;
 }
+
+export function sampleSeconds(id: string): number | null {
+  return SAMPLE_PEOPLE.find((s) => s.id === id)?.seconds ?? null;
+}
+
+/** Library asset ids. Library files are served through the same signed route as member media. */
+export const libraryAssetId = (kind: "photo" | "video", id: string) => `lib-${kind === "photo" ? "ph" : "vd"}-${id}`;
 
 export const REJECT_REASONS = [
   "Video does not match the photo",
@@ -107,3 +106,14 @@ export const REJECT_REASONS = [
   "Age is unclear from the video",
   "Profile details are inconsistent",
 ] as const;
+
+export const REPORT_REASONS = {
+  fake: "Fake profile or someone else's photos",
+  money: "Asked for money",
+  harassment: "Harassment or unwanted contact",
+  inappropriate: "Inappropriate content",
+  underage: "Seems to be under 18",
+  other: "Something else",
+} as const;
+export type ReportReason = keyof typeof REPORT_REASONS;
+export const REPORT_REASON_IDS = Object.keys(REPORT_REASONS) as [ReportReason, ...ReportReason[]];

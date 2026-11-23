@@ -1,6 +1,8 @@
 // Seals the sandbox into a compact JWE (dir + A256GCM): encrypted and tamper-evident.
 // The JSON is deflated first so the cookie stays well under the 4 KB browser limit,
-// and the oldest audit entries and notes are dropped if it still does not fit.
+// and the oldest audit entries and notes are dropped if it still does not fit. If the
+// state that matters (decisions, reports, blocks) still does not fit, the change is refused
+// rather than written to a cookie the browser would silently drop.
 import { hkdfSync } from "node:crypto";
 import { deflateRawSync, inflateRawSync } from "node:zlib";
 import { CompactEncrypt, compactDecrypt } from "jose";
@@ -17,16 +19,22 @@ async function encrypt(sb: Sandbox, key: Uint8Array): Promise<string> {
   return new CompactEncrypt(plaintext).setProtectedHeader({ alg: "dir", enc: "A256GCM" }).encrypt(key);
 }
 
-/** Encrypts the sandbox, trimming the oldest log entries, notes and requests until it fits. */
+export class SandboxFullError extends Error {
+  constructor() {
+    super("Demo storage is full. Use Reset demo to start again.");
+    this.name = "SandboxFullError";
+  }
+}
+
+/** Encrypts the sandbox, trimming the oldest log entries and notes until it fits. */
 export async function sealSandbox(input: Sandbox, key: Uint8Array): Promise<string> {
   const sb = structuredClone(input);
   let token = await encrypt(sb, key);
   while (token.length > MAX_COOKIE_CHARS) {
     if (sb.log.length > 5) sb.log.pop();
     else if (sb.notes.length > 0) sb.notes.pop();
-    else if (sb.msg.length > 0) sb.msg.shift();
     else if (sb.log.length > 0) sb.log.pop();
-    else break;
+    else throw new SandboxFullError();
     token = await encrypt(sb, key);
   }
   return token;

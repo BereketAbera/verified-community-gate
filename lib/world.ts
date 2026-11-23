@@ -5,14 +5,17 @@ import {
   DEMO_ADMIN_ID,
   DEMO_MEMBER_ID,
   DEMO_MODERATOR_ID,
+  FOUNDING_PLACES_TAKEN,
   SEED_ACCOUNTS,
   SEED_ASSETS,
   SEED_AUDIT,
   SEED_BLOCKS,
   SEED_CONVERSATIONS,
   SEED_NOTES,
+  SEED_REPORTS,
 } from "./seed";
-import type { Account, AuditEntry, Conversation, MediaAsset, MediaKind, Note, World } from "./types";
+import type { Account, AuditEntry, Conversation, MediaAsset, MediaKind, Note, Report, World } from "./types";
+import { promptsFor } from "./verification";
 
 export const iso = (epochSeconds: number) => new Date(epochSeconds * 1000).toISOString();
 
@@ -27,6 +30,7 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
   for (const account of SEED_ACCOUNTS) accounts.set(account.id, structuredClone(account));
   for (const asset of SEED_ASSETS) assets.set(asset.id, { ...asset });
 
+  const signupEntries: AuditEntry[] = [];
   if (sb.self) {
     const s = sb.self;
     accounts.set(s.id, {
@@ -41,15 +45,30 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
       languages: s.langs,
       lookingFor: s.look,
       about: s.about,
-      faith: { consentedAt: s.fc ? iso(s.fc) : null, value: s.fc ? s.faith : null },
+      extra: s.x,
+      faith: { consentedAt: s.fc ? iso(s.fc) : null, answers: s.fc ? s.fa : null },
       terms: { version: s.tv, acceptedAt: iso(s.ta) },
       photoId: null,
       videoId: null,
       submittedAt: null,
+      verification: null,
+      approvedAt: null,
+      suspendedFrom: null,
       createdAt: iso(s.at),
       decision: null,
       flag: null,
+      access: s.fnd ? { kind: "founding", until: null, setBy: null } : { kind: "free", until: null, setBy: null },
+      reportsClearedAt: null,
       isSelf: true,
+    });
+    // Built from the signup itself, so trimming the cookie's audit log never loses it.
+    signupEntries.push({
+      id: "signup",
+      at: iso(s.at),
+      actorId: s.id,
+      action: "signup",
+      targetId: s.id,
+      reason: `Terms ${s.tv} accepted; faith-data consent ${s.fc ? "given" : "not given"}`,
     });
   }
 
@@ -57,6 +76,7 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
     const account = accounts.get(id);
     if (!account || account.role !== "member") continue;
     if (ov.s) account.status = ov.s;
+    if (ov.ps !== undefined) account.suspendedFrom = ov.ps;
     if (ov.d !== undefined) {
       account.decision = ov.d ? { status: ov.d.s, reason: ov.d.r, by: ov.d.by, at: iso(ov.d.at) } : null;
     }
@@ -64,6 +84,10 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
       account.flag = ov.f ? { reason: ov.f.r, by: ov.f.by, at: iso(ov.f.at) } : null;
     }
     if (ov.sub !== undefined) account.submittedAt = ov.sub ? iso(ov.sub) : null;
+    if (ov.ap !== undefined) account.approvedAt = ov.ap ? iso(ov.ap) : null;
+    if (ov.vm) account.verification = { prompts: promptsFor(ov.vm.p), seconds: ov.vm.s };
+    if (ov.acc) account.access = { kind: ov.acc.k, until: ov.acc.u ? iso(ov.acc.u) : null, setBy: ov.acc.by };
+    if (ov.rc !== undefined) account.reportsClearedAt = iso(ov.rc);
     for (const kind of ["photo", "video"] as const) {
       const media = kind === "photo" ? ov.ph : ov.vd;
       if (!media) continue;
@@ -86,25 +110,26 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
     blocks.push([pair[0], pair[1]]);
   }
 
-  const conversations: Conversation[] = SEED_CONVERSATIONS.map((c) => ({ ...c, members: [...c.members] as [string, string] }));
+  const conversations: Conversation[] = SEED_CONVERSATIONS.map((c) => structuredClone(c) as Conversation);
   for (const [from, to, at] of sb.msg) {
     const exists = conversations.some((c) => c.members.includes(from) && c.members.includes(to));
     if (exists) continue;
-    conversations.push({
-      id: `r-${from}-${to}`,
-      members: [from, to],
-      state: "requested",
-      startedBy: from,
-      preview: "Message request sent",
-      at: iso(at),
-    });
+    conversations.push({ id: `r-${from}-${to}`, members: [from, to], state: "requested", startedBy: from, at: iso(at), messages: [] });
   }
-  conversations.sort((a, b) => b.at.localeCompare(a.at));
+  const answered = conversations
+    .filter((c) => sb.cv[c.id] !== "declined")
+    .map((c) => (sb.cv[c.id] === "accepted" ? { ...c, state: "active" as const } : c));
+  answered.sort((a, b) => b.at.localeCompare(a.at));
 
   const notes: Note[] = [
     ...sb.notes.map(([at, authorId, targetId, text], i) => ({ id: `sn${sb.notes.length - i}`, at: iso(at), authorId, targetId, text })),
     ...SEED_NOTES,
   ].sort((a, b) => b.at.localeCompare(a.at));
+
+  const reports: Report[] = [
+    ...SEED_REPORTS,
+    ...sb.rep.map(([at, reporterId, targetId, reason], i) => ({ id: `sr${i + 1}`, at: iso(at), reporterId, targetId, reason })),
+  ];
 
   const audit: AuditEntry[] = [
     ...sb.log.map(([at, actorId, action, targetId, reason], i) => ({
@@ -115,10 +140,12 @@ export function buildWorld(sb: Sandbox, now: number = Date.now()): World {
       targetId,
       reason,
     })),
+    ...signupEntries,
     ...SEED_AUDIT,
   ].sort((a, b) => b.at.localeCompare(a.at));
 
-  return { now, accounts, assets, blocks, conversations, notes, audit };
+  const foundingPlacesTaken = FOUNDING_PLACES_TAKEN + (sb.self?.fnd ? 1 : 0);
+  return { now, accounts, assets, blocks, conversations: answered, notes, reports, audit, foundingPlacesTaken };
 }
 
 /** Maps the chosen demo identity to an account. "visitor" (signed out) has none. */

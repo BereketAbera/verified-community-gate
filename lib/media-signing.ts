@@ -30,16 +30,19 @@ export function verifyMediaLink(
   now = nowSeconds(),
 ): LinkCheck {
   if (!link.exp || !link.sig) return { ok: false, reason: "missing" };
-  if (!/^\d{1,12}$/.test(link.exp) || !/^[A-Za-z0-9_-]{43}$/.test(link.sig)) return { ok: false, reason: "malformed" };
+  const wellFormed = /^\d{1,12}$/.test(link.exp) && /^[A-Za-z0-9_-]{43}$/.test(link.sig);
+  if (!wellFormed) return { ok: false, reason: "malformed" };
   if (!viewerId) return { ok: false, reason: "no_session" };
   const exp = Number(link.exp);
   const expected = mac(link.assetId, viewerId, exp, secret);
   const given = Buffer.from(link.sig, "base64url");
+  // Altered, or issued to a different viewer:
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
-    return { ok: false, reason: "bad_signature" }; // altered, or issued to a different viewer
+    return { ok: false, reason: "bad_signature" };
   }
   if (now > exp) return { ok: false, reason: "expired" };
-  if (exp - now > LINK_TTL_SECONDS + CLOCK_SKEW_SECONDS) return { ok: false, reason: "lifetime_too_long" };
+  const lifetime = exp - now;
+  if (lifetime > LINK_TTL_SECONDS + CLOCK_SKEW_SECONDS) return { ok: false, reason: "lifetime_too_long" };
   return { ok: true };
 }
 // #endregion

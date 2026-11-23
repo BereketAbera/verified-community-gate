@@ -2,9 +2,9 @@
 // Every viewer kind x every target status x every block direction, for each surface:
 // search listing, member page, messaging and media access.
 import { describe, expect, it } from "vitest";
-import { createPolicy } from "@/lib/policy";
-import { STATUSES, type Role, type Status, type Visibility } from "@/lib/types";
-import { account, assetsFor, world } from "./helpers";
+import { createPolicy, REPORTS_TO_HIDE } from "@/lib/policy";
+import { SAMPLE_LIBRARY, STATUSES, type Access, type Role, type Status, type Visibility } from "@/lib/types";
+import { account, assetsFor, reports, world } from "./helpers";
 
 type ViewerKind = { label: string; role: Role; status: Status } | { label: "signed-out visitor"; role: null; status: null };
 type Block = "no block" | "viewer blocked target" | "target blocked viewer";
@@ -169,3 +169,118 @@ describe("Edge rules", () => {
     expect(policy.can(null, "audit.read")).toBe(false);
   });
 });
+
+describe("Starting a conversation: both visible to each other, and the starter has an active membership (R6)", () => {
+  it.each(
+    CASES.filter((c) => c.viewer.role === "member").map((c) => {
+      const allowed = expectsProfile(c);
+      return [name(c, allowed ? "can start with a membership" : "cannot start"), c, allowed] as const;
+    }),
+  )("%s", (_, c, allowed) => {
+    const { policy, viewer, target } = setup(c);
+    expect(policy.canStartConversation(viewer, target)).toBe(allowed);
+  });
+
+  const ACCESS: Array<[string, Access, boolean]> = [
+    ["free plan", { kind: "free", until: null, setBy: null }, false],
+    ["paid, still running", { kind: "paid", until: "2026-12-23T00:00:00Z", setBy: null }, true],
+    ["paid, ended", { kind: "paid", until: "2026-11-01T00:00:00Z", setBy: null }, false],
+    ["complimentary, still running", { kind: "complimentary", until: "2026-12-31T00:00:00Z", setBy: "s02" }, true],
+    ["complimentary, ended", { kind: "complimentary", until: "2026-11-22T00:00:00Z", setBy: "s02" }, false],
+    ["founding, months not started", { kind: "founding", until: null, setBy: null }, false],
+    ["founding, still running", { kind: "founding", until: "2027-02-01T00:00:00Z", setBy: null }, true],
+    ["founding, ended", { kind: "founding", until: "2026-10-29T00:00:00Z", setBy: null }, false],
+  ];
+  it.each(ACCESS)("approved member on %s: starting allowed = %s, replying always allowed", (_, access, allowed) => {
+    const viewer = account("viewer", "member", "approved", { access });
+    const other = account("other", "member", "approved");
+    const policy = createPolicy(world([viewer, other]));
+    expect(policy.canStartConversation(viewer, other)).toBe(allowed);
+    expect(policy.canMessage(viewer, other)).toBe(true); // replying and accepting are free
+  });
+
+  it("staff and signed-out viewers never start member conversations", () => {
+    const other = account("other", "member", "approved");
+    const policy = createPolicy(world([other, account("mod", "moderator", "approved")]));
+    expect(policy.canStartConversation(null, other)).toBe(false);
+    expect(policy.canStartConversation(account("mod", "moderator", "approved"), other)).toBe(false);
+  });
+});
+
+describe("Reports: three open reports hide a profile until a moderator reviews them (R9)", () => {
+  const viewer = account("viewer", "member", "approved");
+
+  it.each([0, 1, 2, 3, 4].map((n) => [n, n < REPORTS_TO_HIDE] as const))("with %i open reports, visible to members: %s", (count, visible) => {
+    const target = account("target", "member", "approved");
+    const policy = createPolicy(world([viewer, target], { reports: reports("target", count), assets: assetsFor(target, "members", "members") }));
+    expect(policy.getVisibleMember(viewer, "target") !== null).toBe(visible);
+    expect(policy.listVisibleMembers(viewer).map((m) => m.id).includes("target")).toBe(visible);
+    expect(policy.canMessage(viewer, target)).toBe(visible);
+    expect(policy.canAccessMedia(viewer, assetsFor(target, "members", "members")[0])).toBe(visible);
+  });
+
+  it("reports filed before a moderator's review no longer count", () => {
+    const target = account("target", "member", "approved", { reportsClearedAt: "2026-11-21T00:00:00Z" });
+    const policy = createPolicy(world([viewer, target], { reports: reports("target", 3, "2026-11-20T00:00:00Z") }));
+    expect(policy.getVisibleMember(viewer, "target")).not.toBeNull();
+  });
+
+  it("a hidden profile stays open to moderators, and its owner still sees other members", () => {
+    const target = account("target", "member", "approved");
+    const mod = account("mod", "moderator", "approved");
+    const policy = createPolicy(world([viewer, target, mod], { reports: reports("target", 3), assets: assetsFor(target, "members", "members") }));
+    expect(policy.getProfileForReview(mod, "target")).not.toBeNull();
+    expect(policy.canAccessMedia(mod, assetsFor(target, "members", "members")[0])).toBe(true);
+    expect(policy.listVisibleMembers(target).map((m) => m.id)).toEqual(["viewer"]);
+  });
+});
+
+describe("Visibility counts come from the policy", () => {
+  it("counts who can see an account: nobody sees a pending one; every unblocked approved member sees an approved one", () => {
+    const pending = account("pending", "member", "pending");
+    const approved = account("approved", "member", "approved");
+    const others = ["a", "b", "c"].map((id) => account(id, "member", "approved"));
+    const policy = createPolicy(world([pending, approved, ...others, account("mod", "moderator", "approved")], { blocks: [["a", "approved"]] }));
+    expect(policy.countWhoCanSee(pending)).toBe(0);
+    expect(policy.listVisibleMembers(pending)).toHaveLength(0);
+    expect(policy.countWhoCanSee(approved)).toBe(2); // b and c; a blocked them
+  });
+});
+
+describe("Edge rules for the approval record and blocks", () => {
+  it("an approved status without a moderator's approval on record is still hidden", () => {
+    const viewer = account("viewer", "member", "approved");
+    const target = account("target", "member", "approved", { approvedAt: null });
+    const policy = createPolicy(world([viewer, target]));
+    expect(policy.getVisibleMember(viewer, "target")).toBeNull();
+    expect(policy.listVisibleMembers(viewer)).toEqual([]);
+  });
+
+  it("a block hides only the pair: both still see everyone else", () => {
+    const a = account("a", "member", "approved");
+    const b = account("b", "member", "approved");
+    const c = account("c", "member", "approved");
+    const policy = createPolicy(world([a, b, c], { blocks: [["a", "b"]] }));
+    expect(policy.listVisibleMembers(a).map((m) => m.id)).toEqual(["c"]);
+    expect(policy.listVisibleMembers(b).map((m) => m.id)).toEqual(["c"]);
+    expect(policy.listVisibleMembers(c).map((m) => m.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("Sample library: fictional files a new member picks from", () => {
+  const library = { id: "lib-ph-sample-a", ownerId: SAMPLE_LIBRARY, kind: "photo" as const, file: "photos/sample-a.jpg", visibility: "members" as const };
+  it.each([
+    ["signed-out visitor", null, false],
+    ["pending member", account("v", "member", "pending"), true],
+    ["rejected member", account("v", "member", "rejected"), true],
+    ["approved member", account("v", "member", "approved"), true],
+    ["suspended member", account("v", "member", "suspended"), false],
+    ["banned member", account("v", "member", "banned"), false],
+    ["moderator", account("v", "moderator", "approved"), true],
+  ] as const)("%s: library access %s", (_, viewer, allowed) => {
+    const policy = createPolicy(world(viewer ? [viewer] : [], { assets: [library] }));
+    expect(policy.getAccessibleAsset(viewer, library.id) !== null).toBe(allowed);
+    expect(policy.canAccessMedia(viewer, library)).toBe(false); // never through the member-media rule
+  });
+});
+
