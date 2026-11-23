@@ -134,7 +134,7 @@ export default async function TestsPage() {
       {unit ? (
         <section className="flex flex-col gap-3">
           <h2 className="font-heading text-2xl font-semibold">Visibility matrix</h2>
-          <p className="text-muted-foreground">Who appears in search, by viewer and profile status. Each cell is one passing test; member pages, messaging and media have matrices of their own below.</p>
+          <p className="text-muted-foreground">Who appears in search, by viewer and profile status. Each cell is a test from this build. Member pages, messaging and media are checked across the same grid; every case is listed further down.</p>
           <Matrix tests={unit.tests} />
         </section>
       ) : null}

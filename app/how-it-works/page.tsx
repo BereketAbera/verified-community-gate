@@ -27,7 +27,7 @@ function YesNo({ value }: { value: boolean }) {
 function Section({ id, step, title, children }: { id: string; step: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24 border-t pt-10">
-      <p className="eyebrow">{step}</p>
+      <p className="eyebrow">Step {step}</p>
       <h2 className="mt-1 mb-4 font-heading text-2xl font-semibold tracking-tight">{title}</h2>
       <div className="flex flex-col gap-4 text-base leading-relaxed text-foreground/90">{children}</div>
     </section>

@@ -56,31 +56,11 @@ export interface E2eRun {
   results: Record<string, string>;
 }
 
-interface PlaywrightJson {
-  config: { metadata?: { baseURL?: string } };
-  stats: { startTime: string; expected: number; unexpected: number; flaky: number };
-  suites: Array<{ specs?: Array<{ title: string; ok: boolean }>; suites?: PlaywrightJson["suites"] }>;
-}
-
-/** The last recorded end-to-end run (reports/e2e-latest.json), if one was committed. */
+/** The last recorded end-to-end run (reports/e2e-latest.json, written by scripts/summarize-e2e.mjs). */
 export async function readE2eRun(): Promise<E2eRun | null> {
   try {
-    const raw = JSON.parse(await readFile(path.join(process.cwd(), "reports", "e2e-latest.json"), "utf8")) as PlaywrightJson;
-    const results: Record<string, string> = {};
-    const walk = (suites: PlaywrightJson["suites"]) => {
-      for (const suite of suites) {
-        for (const spec of suite.specs ?? []) results[spec.title] = spec.ok ? "passed" : "failed";
-        if (suite.suites) walk(suite.suites);
-      }
-    };
-    walk(raw.suites);
-    return {
-      baseURL: raw.config.metadata?.baseURL ?? "unknown",
-      startedAt: raw.stats.startTime,
-      passed: raw.stats.expected + raw.stats.flaky,
-      failed: raw.stats.unexpected,
-      results,
-    };
+    const raw = JSON.parse(await readFile(path.join(process.cwd(), "reports", "e2e-latest.json"), "utf8")) as E2eRun;
+    return typeof raw.passed === "number" && raw.results ? raw : null;
   } catch {
     return null;
   }

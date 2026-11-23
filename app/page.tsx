@@ -11,28 +11,28 @@ const IDENTITIES: Array<{ value: Identity; title: string; who: string; body: str
     value: "newcomer",
     title: "New member (pending)",
     who: "Your own signup",
-    body: "Sign up, pick a sample photo and video, and see what a pending account can reach: nothing. Direct member links return 404.",
+    body: "Sign up and submit a sample photo and video. Search is empty and member links return 404.",
     icon: UserRoundPlus,
   },
   {
     value: "member",
     title: "Approved member",
     who: "Amara Okafor",
-    body: "Browse verified members, set your photo or video to private, copy a signed link and watch it expire, replace your video and drop back into review.",
+    body: "Browse verified members, make your media private, watch a signed link expire, replace your video.",
     icon: UsersRound,
   },
   {
     value: "moderator",
     title: "Moderator",
     who: "Morgan Lee",
-    body: "Work the review queue: photo beside video, stated against detected country, approve, reject with a reason, flag, notes, audit log.",
+    body: "Photo beside video, stated against detected country, approve, reject with a reason, flag, notes.",
     icon: Gavel,
   },
   {
     value: "admin",
     title: "Admin",
     who: "Riley Park",
-    body: "Everything a moderator can do, plus suspend, ban and reinstate. A suspended member disappears from search and messages at once.",
+    body: "Everything a moderator can do, plus suspend, ban and reinstate. Suspended members vanish at once.",
     icon: ShieldCheck,
   },
 ];
@@ -42,16 +42,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const { identity } = await getGate();
 
   return (
-    <div className="flex flex-col gap-14">
+    <div className="flex flex-col gap-10">
       {reset ? <Notice tone="success" title="Demo reset">Your sandbox was cleared. Everything is back to the seed data.</Notice> : null}
 
-      <section className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:items-end">
+      <section className="grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-center">
         <div className="flex flex-col gap-4">
           <p className="eyebrow">Working sample · trust and safety layer</p>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+          <h1 className="font-heading text-4xl leading-[1.08] font-semibold tracking-tight text-balance sm:text-[2.9rem]">
             Nobody is visible until a person has checked their video.
           </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">
+          <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
             A members-only community where every profile is hidden by default. A moderator compares each new member&apos;s short
             video with their photo before anyone can see them. Photos and videos have no public URL, and the rules are covered by
             automated tests.

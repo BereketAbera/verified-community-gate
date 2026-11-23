@@ -94,6 +94,9 @@ pnpm build                                    # runs the unit tests, then next b
 `pnpm exec playwright install chromium` installs the browser the first time. `pnpm build` writes the unit test results
 to `generated/`, and the `/tests` page lists every test from that run, with a visibility matrix built from the results.
 
+To record an end-to-end run for the `/tests` page, run the suite with `E2E_RECORD=1` and then
+`node scripts/summarize-e2e.mjs`, which writes a small summary to `reports/e2e-latest.json` for the next deploy.
+
 ## Project layout
 
 ```

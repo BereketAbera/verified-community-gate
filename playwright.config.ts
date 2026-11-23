@@ -12,7 +12,8 @@ export default defineConfig({
   retries: 0,
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  reporter: process.env.E2E_RECORD ? [["list"], ["json", { outputFile: "reports/e2e-latest.json" }]] : "list",
+  // E2E_RECORD=1 also writes a JSON report; scripts/summarize-e2e.mjs turns it into reports/e2e-latest.json.
+  reporter: process.env.E2E_RECORD ? [["list"], ["json", { outputFile: "test-results/e2e-report.json" }]] : "list",
   metadata: { baseURL },
   use: { baseURL, trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
