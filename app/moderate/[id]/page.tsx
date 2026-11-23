@@ -34,7 +34,7 @@ function ReviewMedia({ gate, member, kind }: { gate: Gate; member: Account; kind
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-medium">{kind === "photo" ? "Profile photo" : "Verification video"}</p>
-      {link ? <SignedMedia link={link} alt={`${kind === "photo" ? "Photo" : "Video"} submitted by ${member.displayName}`} /> : <MediaPlaceholder kind={kind} reason="none" />}
+      {link ? <SignedMedia link={link} alt={`${kind === "photo" ? "Photo" : "Video"} submitted by ${member.displayName}`} autoPlay /> : <MediaPlaceholder kind={kind} reason="none" />}
       {link ? (
         <p className="text-xs text-muted-foreground">Member setting: {link.visibility === "members" ? "approved members" : "private"} (moderators always see it)</p>
       ) : null}

@@ -13,6 +13,8 @@ interface Props {
   alt: string;
   /** Show the expiry countdown and the copy / renew buttons. */
   withControls?: boolean;
+  /** Loop the (silent) clip, as a moderator would watch it. */
+  autoPlay?: boolean;
   className?: string;
 }
 
@@ -20,7 +22,7 @@ interface Props {
  * Renders a photo or video from a 60-second signed link. The countdown and the copy
  * button let a reviewer paste the link elsewhere and watch it stop working.
  */
-export function SignedMedia({ link: initial, alt, withControls = true, className }: Props) {
+export function SignedMedia({ link: initial, alt, withControls = true, autoPlay = false, className }: Props) {
   const [link, setLink] = useState<SignedLink | null>(initial);
   const [now, setNow] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
@@ -73,6 +75,7 @@ export function SignedMedia({ link: initial, alt, withControls = true, className
             aria-label={alt}
             className="aspect-[3/4] w-full bg-zinc-900 object-cover"
             controls
+            autoPlay={autoPlay}
             muted
             loop
             playsInline

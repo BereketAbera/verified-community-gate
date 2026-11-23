@@ -55,7 +55,7 @@ export function VerifyForm() {
               </span>
               <span className="flex items-center gap-2 px-1 pb-1 text-sm">
                 <RadioGroupItem value={video.id} />
-                {video.label}
+                {video.label.replace("Sample video", "Video")}
               </span>
             </label>
           ))}

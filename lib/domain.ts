@@ -65,7 +65,10 @@ export const IdentityInput = z.enum(IDENTITIES);
 
 export const SignupInput = z.object({
   name: z.string().trim().min(2, "Use at least 2 characters").max(40, "Keep it under 40 characters"),
-  age: z.coerce.number({ error: "Enter your age" }).int().min(18, "Members must be 18 or older").max(99),
+  age: z.preprocess(
+    (v) => (v === "" || v === null ? undefined : v),
+    z.coerce.number({ error: "Enter your age" }).int("Enter a whole number").min(18, "Members must be 18 or older").max(99, "Enter a real age"),
+  ),
   city: z.string().trim().min(1, "Enter a city").max(40),
   country: z.enum(COUNTRY_CODES, { error: "Choose a country" }),
   languages: z.array(z.enum(LANGUAGES)).min(1, "Pick at least one language").max(5, "Pick up to five"),

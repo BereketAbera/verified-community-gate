@@ -22,7 +22,7 @@ export function MediaPlaceholder({
       data-testid="media-placeholder"
       data-reason={reason}
       className={cn(
-        "flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 rounded-lg bg-muted px-6 text-center text-sm text-muted-foreground ring-1 ring-foreground/10",
+        "flex aspect-[3/4] w-full flex-col items-center justify-center gap-1.5 rounded-lg bg-muted px-3 text-center text-sm text-muted-foreground ring-1 ring-foreground/10 sm:gap-2 sm:px-6",
         className,
       )}
     >

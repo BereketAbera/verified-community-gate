@@ -60,7 +60,7 @@ function Matrix({ tests }: { tests: UnitTest[] }) {
             const b = blocked.get(viewer);
             return (
               <tr key={viewer} className="border-b last:border-0">
-                <th scope="row" className="px-4 py-2 text-left font-medium capitalize">{viewer}</th>
+                <th scope="row" className="px-4 py-2 text-left font-medium">{viewer[0].toUpperCase() + viewer.slice(1)}</th>
                 {TARGETS.map((target) => {
                   const cell = cells.get(`${viewer}|${target}`);
                   const listed = cell?.outcome === "listed";

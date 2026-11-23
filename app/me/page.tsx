@@ -56,7 +56,7 @@ function MediaManager({ gate, viewer, kind }: { gate: Gate; viewer: Account; kin
           </span>
         ) : null}
       </div>
-      {link ? <SignedMedia link={link} alt={`Your ${kind}`} /> : <MediaPlaceholder kind={kind} reason={restricted ? "ended" : "none"} />}
+      {link ? <SignedMedia link={link} alt={`Your ${kind}`} autoPlay /> : <MediaPlaceholder kind={kind} reason={restricted ? "ended" : "none"} />}
       {link ? (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-medium text-muted-foreground">Who can see it</p>

@@ -19,18 +19,18 @@ export function MemberCard({ member, photo, photoPrivate }: { member: Account; p
       ) : (
         <MediaPlaceholder kind="photo" reason={photoPrivate ? "private" : "none"} className="aspect-[4/3] rounded-none ring-0" />
       )}
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <p className="font-heading text-lg leading-tight font-semibold group-hover:underline group-hover:underline-offset-4">
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:gap-1.5 sm:p-4">
+        <p className="font-heading text-base leading-tight font-semibold group-hover:underline group-hover:underline-offset-4 sm:text-lg">
           {member.displayName}
           {member.age ? <span className="font-sans text-sm font-normal text-muted-foreground">, {member.age}</span> : null}
         </p>
-        <p className="flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="size-3.5" aria-hidden />
-          {member.city}, {countryName(member.country)}
+        <p className="flex items-start gap-1 text-xs text-muted-foreground sm:text-sm">
+          <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          <span>{member.city}, {countryName(member.country)}</span>
         </p>
-        <p className="text-sm text-muted-foreground">{member.languages.join(" · ")}</p>
+        <p className="text-xs text-muted-foreground sm:text-sm">{member.languages.join(" · ")}</p>
         {member.lookingFor ? (
-          <p className="mt-auto pt-2 text-xs font-medium text-primary">Looking for: {LOOKING_FOR_LABELS[member.lookingFor]}</p>
+          <p className="mt-auto pt-1.5 text-xs font-medium text-primary sm:pt-2">Looking for: {LOOKING_FOR_LABELS[member.lookingFor]}</p>
         ) : null}
       </div>
     </Link>

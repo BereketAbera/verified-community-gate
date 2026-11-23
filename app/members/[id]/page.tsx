@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Member" };
 function MediaFor({ gate, member, kind }: { gate: Gate; member: Account; kind: MediaKind }) {
   const slot = gate.policy.mediaSlot(gate.viewer, member, kind);
   const link = slot.state === "available" ? signedLinkFor(gate, slot.asset) : null;
-  if (link) return <SignedMedia link={link} alt={`${kind === "photo" ? "Photo" : "Video"} of ${member.displayName}`} />;
+  if (link) return <SignedMedia link={link} alt={`${kind === "photo" ? "Photo" : "Video"} of ${member.displayName}`} autoPlay />;
   return <MediaPlaceholder kind={kind} reason={slot.state === "private" ? "private" : "none"} />;
 }
 

@@ -32,7 +32,7 @@ export function IdentitySwitcher({ current, options }: { current: Identity; opti
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" data-testid="identity-trigger" className="bg-card">
             <UserRound aria-hidden />
-            <span className="text-muted-foreground">Viewing as</span>
+            <span className="hidden text-muted-foreground sm:inline">Viewing as</span>
             <span className="font-medium">{active.label}</span>
             <ChevronDown aria-hidden />
           </Button>

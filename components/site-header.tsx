@@ -29,23 +29,23 @@ export async function SiteHeader() {
   return (
     <header className="border-b border-border/80 bg-card/70 backdrop-blur">
       <div className="bg-secondary/80 text-secondary-foreground">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 text-sm sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-xs sm:px-6 sm:text-sm">
           <p className="flex items-center gap-2">
             <span className="inline-block size-1.5 rounded-full bg-primary" aria-hidden />
             Demo identities, no real sign-in
           </p>
-          <div className="flex items-center gap-2">
-            {viewer && viewer.role === "member" ? <StatusBadge status={viewer.status} /> : null}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {viewer && viewer.role === "member" ? <StatusBadge status={viewer.status} className="hidden sm:inline-flex" /> : null}
             <IdentitySwitcher current={identity} options={options} />
             <form method="post" action="/api/reset">
-              <button type="submit" className="rounded-md px-2 py-1 text-sm text-secondary-foreground/80 underline-offset-4 hover:text-secondary-foreground hover:underline">
+              <button type="submit" className="rounded-md px-1.5 py-1 whitespace-nowrap text-secondary-foreground/80 underline-offset-4 hover:text-secondary-foreground hover:underline sm:px-2">
                 Reset demo
               </button>
             </form>
           </div>
         </div>
       </div>
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
         <Link href="/" className="group flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShieldCheck className="size-5" aria-hidden />

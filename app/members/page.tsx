@@ -39,47 +39,52 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   return (
     <div className="flex flex-col gap-6">
       <PageTitle eyebrow="Approved members only" title="Members">
-        Everyone here has been checked by a moderator. Pending, rejected, suspended and banned profiles never appear, and
-        neither does anyone you have blocked or who has blocked you.
+        Everyone here was checked by a moderator. Pending, rejected, suspended and banned profiles never appear, and
+        neither does anyone you blocked or who blocked you.
       </PageTitle>
 
       {params.notice === "blocked" ? (
         <Notice tone="success" title="Member blocked">You will not see each other anywhere now: search, profiles, messages or media.</Notice>
       ) : null}
 
-      <form method="get" className="grid gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] lg:items-end">
+      <form
+        method="get"
+        className="grid grid-cols-[1fr_auto] gap-2 rounded-xl bg-card p-3 ring-1 ring-foreground/10 sm:p-4 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] lg:items-end lg:gap-3"
+      >
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="q">Name or city</Label>
-          <Input id="q" name="q" defaultValue={filters.q} placeholder="Search" className="bg-card" />
+          <Label htmlFor="q" className="max-lg:sr-only">Name or city</Label>
+          <Input id="q" name="q" defaultValue={filters.q} placeholder="Search by name or city" className="h-9 bg-card" />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="country">Country</Label>
-          <select id="country" name="country" defaultValue={filters.country ?? ""} className={selectClass}>
-            <option value="">Any country</option>
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>{c.name}</option>
-            ))}
-          </select>
+        <div className="col-span-2 grid grid-cols-2 gap-2 lg:contents">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Label htmlFor="country" className="max-lg:sr-only">Country</Label>
+            <select id="country" name="country" defaultValue={filters.country ?? ""} className={selectClass}>
+              <option value="">Any country</option>
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <Label htmlFor="language" className="max-lg:sr-only">Language</Label>
+            <select id="language" name="language" defaultValue={filters.language ?? ""} className={selectClass}>
+              <option value="">Any language</option>
+              {LANGUAGES.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-span-2 flex min-w-0 flex-col gap-1.5 lg:col-span-1">
+            <Label htmlFor="lookingFor" className="max-lg:sr-only">Looking for</Label>
+            <select id="lookingFor" name="lookingFor" defaultValue={filters.lookingFor ?? ""} className={selectClass}>
+              <option value="">Looking for anything</option>
+              {LOOKING_FOR.map((l) => (
+                <option key={l} value={l}>{LOOKING_FOR_LABELS[l]}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="language">Language</Label>
-          <select id="language" name="language" defaultValue={filters.language ?? ""} className={selectClass}>
-            <option value="">Any language</option>
-            {LANGUAGES.map((l) => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="lookingFor">Looking for</Label>
-          <select id="lookingFor" name="lookingFor" defaultValue={filters.lookingFor ?? ""} className={selectClass}>
-            <option value="">Anything</option>
-            {LOOKING_FOR.map((l) => (
-              <option key={l} value={l}>{LOOKING_FOR_LABELS[l]}</option>
-            ))}
-          </select>
-        </div>
-        <Button type="submit" className="h-9">
+        <Button type="submit" className="col-start-2 row-start-1 h-9 self-end lg:col-start-auto lg:row-start-auto">
           <Search aria-hidden /> Search
         </Button>
       </form>
@@ -92,7 +97,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       {members.length === 0 ? (
         <p className="rounded-xl bg-card p-8 text-center text-muted-foreground ring-1 ring-foreground/10">No members match these filters.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-testid="member-grid">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4" data-testid="member-grid">
           {members.map((member) => {
             const slot = policy.mediaSlot(viewer, member, "photo");
             return (
