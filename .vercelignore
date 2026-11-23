@@ -1,0 +1,8 @@
+.env*
+!.env.example
+.next
+node_modules
+generated
+test-results
+playwright-report
+blob-report
