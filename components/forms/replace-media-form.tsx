@@ -16,6 +16,7 @@ export function ReplaceMediaForm({ kind }: { kind: MediaKind }) {
         <select
           name="choice"
           aria-label={`Replacement ${kind}`}
+          data-size="sm"
           defaultValue={SAMPLE_PEOPLE[SAMPLE_PEOPLE.length - 1].id}
           className="h-8 min-w-0 flex-1 rounded-lg border border-input bg-card px-2 text-sm"
         >

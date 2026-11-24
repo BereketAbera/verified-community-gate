@@ -155,6 +155,39 @@
   }
 }
 
+/* Single-line selects draw our own arrow, so it sits as far from the right border as the text sits from the left one.
+   Kept outside the layers so it wins over the padding utilities. The inset matches the control's side padding. */
+select:not([multiple]):not([size]) {
+  --select-inset: 0.625rem;
+  --select-arrow: 1rem;
+  --select-gap: 0.5rem;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235b646f' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 5.75 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--select-inset) center;
+  background-size: var(--select-arrow);
+  padding-right: calc(var(--select-inset) + var(--select-arrow) + var(--select-gap));
+}
+/* Compact selects (h-8, px-2): a smaller arrow on a smaller inset, and a gap that keeps their natural width as it was. */
+select:not([multiple]):not([size])[data-size="sm"] {
+  --select-inset: 0.5rem;
+  --select-arrow: 0.875rem;
+  --select-gap: 0.125rem;
+}
+select:not([multiple]):not([size]):disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%237d8792' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 5.75 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E");
+}
+/* In forced colours the system paints the control, so hand the arrow back to it. */
+@media (forced-colors: active) {
+  select:not([multiple]):not([size]) {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
+    padding-right: revert-layer;
+  }
+}
+
 @keyframes nav-progress {
   0% {
     transform: translateX(-100%);

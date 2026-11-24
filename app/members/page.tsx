@@ -78,7 +78,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           <Label htmlFor="q" className="max-lg:sr-only">Name or city</Label>
           <Input id="q" name="q" defaultValue={filters.q} placeholder="Search by name or city" className="h-9 bg-card" maxLength={40} />
         </div>
-        <div className="col-span-2 grid grid-cols-2 gap-2 lg:contents">
+        <div className="col-span-2 grid grid-cols-[4fr_3fr] gap-2 lg:contents">
           <div className="flex min-w-0 flex-col gap-1.5">
             <Label htmlFor="country" className="max-lg:sr-only">Country</Label>
             <select id="country" name="country" defaultValue={filters.country ?? ""} className={selectClass}>
